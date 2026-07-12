@@ -1,15 +1,36 @@
-import { NestFactory } from '@nestjs/core';
-import { AppModule } from './app.module';
-import { ValidationPipe } from '@nestjs/common';
+import { Route, RouteCreator } from "./modules/route.creator"
 
-async function bootstrap() {
-  const app = await NestFactory.create(AppModule);
-  
-  app.useGlobalPipes(new ValidationPipe({
-    transform: true,
-    forbidNonWhitelisted: true,
-    whitelist: true
-  }))
-  await app.listen(process.env.PORT ?? 3000);
-}
-bootstrap();
+const server = Bun.serve({
+    port: 3000,
+    async fetch(request) {
+        const rb = Route
+
+        rb.createRESTApi((route_build) => {
+            return route_build
+                .url("/")
+                .method("GET")
+                .controller((req, res) => {
+                    return new res(JSON.stringify({message: "Halo :D"}), {
+                        headers: {
+                            "Content-Type": "application/json"
+                        }
+                    })
+                })
+        })
+
+        rb.createRESTApi(route_build => {
+            return route_build
+                .url("/greet")
+                .method('GET')
+                .controller((req, res) => {
+                    return new res(JSON.stringify({message: "Halo lagi"}), {
+                        headers: {
+                            "Content-Type": "application/json"
+                        }
+                    })
+                })
+        })
+
+        return rb.hearRequest(request)
+    }
+})
