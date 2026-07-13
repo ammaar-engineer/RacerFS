@@ -1,5 +1,9 @@
 node_modules/
+
 backend/node_modules/
 backend/.env/
+
 tui/.env/
 tui/node_modules/
+
+test_area/.env

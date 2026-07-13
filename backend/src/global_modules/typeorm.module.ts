@@ -9,7 +9,8 @@ import {TypeOrmModule} from '@nestjs/typeorm'
             host: 'localhost',
             port: 5432,
             username: 'racerfs',
-            password: 'racerfs_password'
+            password: 'racerfs_password',
+            database: 'racerfs_db',
         })
     ],
     exports: [TypeOrmModule]
