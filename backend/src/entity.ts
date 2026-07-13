@@ -16,9 +16,6 @@ export class User {
   @Column({ type: "varchar", length: 40, unique: true })
   email!: string;
 
-  @Column({ type: "varchar", length: 255 })
-  password!: string;
-
   @CreateDateColumn({ type: "timestamp with time zone" })
   created_at!: Date;
 

@@ -1,0 +1,19 @@
+import { Module, Res } from '@nestjs/common';
+import { ConfigModule, ConfigService } from '@nestjs/config';
+import {Resend} from 'resend'
+
+export const RESEND_CLIENT = "RESEND_CLIENT"
+
+@Module({
+    imports: [ConfigModule],
+    providers: [
+        {
+            provide: RESEND_CLIENT,
+            useFactory (configService: ConfigService) {
+                return new Resend(configService.get('RESEND_API_KEY'))
+            }
+        }
+    ],
+    exports: [RESEND_CLIENT]
+})
+export class EmailSendModule {}

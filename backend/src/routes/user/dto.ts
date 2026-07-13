@@ -1,10 +1,15 @@
 import { IsEmail, IsString } from "class-validator"
 
 
-export class RegisterDTO {
+export class UserRegisterDTO {
     @IsEmail()
     email!: string;
+}
 
+export class VerifyOtpDTO {
     @IsString()
-    password!: string
+    sessionId!: string;
+    
+    @IsString()
+    otp!: string;
 }
