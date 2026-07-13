@@ -7,3 +7,4 @@ tui/.env/
 tui/node_modules/
 
 test_area/.env
+test_area/node_modules
