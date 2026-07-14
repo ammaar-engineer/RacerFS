@@ -61,6 +61,7 @@ export class UserService {
         const redisData = await this.redisService.get(sessionId);
         
         if (!redisData) {
+            console.log("redis data", redisData)
             throw new NotFoundException("Session not found or expired");
         }
         

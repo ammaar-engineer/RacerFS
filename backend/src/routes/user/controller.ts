@@ -25,7 +25,6 @@ export class UserController {
     @Post('register')
     async UserRegister(@Body() body: UserRegisterDTO) {
         const {email} = body
-        console.log(email)
         const emailExist = await this.mainDb.findOne({
             where: {
                 email: email
@@ -36,10 +35,12 @@ export class UserController {
         }
         
         // Generate OTP dan simpan ke Redis
-        const { sessionId, otp } = await this.userService.generateOtp('delivered@resend.dev', 'register')
-        
+        const { sessionId, otp } = await this.userService.generateOtp(email, 'register')
+
+        // Debug
+        console.log("ISI EMAIL= ", email, otp) 
         // Kirim OTP ke email
-        await this.userService.sendOtpCodeToEmail('delivered@resend.dev', otp, 'register')
+        // await this.userService.sendOtpCodeToEmail(email, otp, 'register')
         
         return SuccessResponse("OTP Has been sent to your email", { sessionId })
     }
@@ -60,8 +61,11 @@ export class UserController {
         // Generate OTP dan simpan ke Redis
         const { sessionId, otp } = await this.userService.generateOtp(email, 'login')
         
+        // Buat debug
+        console.log("ISI EMAIL= ", email, otp) 
+
         // Kirim OTP ke email
-        await this.userService.sendOtpCodeToEmail(email, otp, 'login')
+        // await this.userService.sendOtpCodeToEmail(email, otp, 'login')
         
         return SuccessResponse("OTP Has been sent to your email", { sessionId })
     }
@@ -90,7 +94,7 @@ export class UserController {
         const {id} = await this.mainDb.save(newUser);
         
         return SuccessResponse("OTP verified successfully and user created", { 
-            token: this.jwtService.generateJwt({userId: id}, '9d')
+            token: "token"
         });
     }
 

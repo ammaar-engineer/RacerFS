@@ -1,14 +1,20 @@
 import { ArgumentsHost, Catch, HttpException } from "@nestjs/common";
 import { BaseExceptionFilter } from "@nestjs/core";
+import { ConfigService } from "@nestjs/config";
 import { BaseException } from './CustomExceptionHandle'
 import { Response } from 'express'
 import { static_output_types } from "./types/static_output_types";
 
 @Catch()
 export class CustomGlobalException extends BaseExceptionFilter {
+  constructor(private readonly configService: ConfigService) {
+    super();
+  }
+
   catch(exception: any, host: ArgumentsHost): void {
     const ctx = host.switchToHttp()
     const response = ctx.getResponse<Response>()
+    const isDevelopment = this.configService.get<string>('NODE_ENV') === 'development'
 
     let ServerOutput: static_output_types = {
       statusCode: 500,
@@ -17,7 +23,14 @@ export class CustomGlobalException extends BaseExceptionFilter {
       data: null,
       message: "Internal server error"
     }
-    console.log(exception)
+
+    if (isDevelopment) {
+      console.error('=== Exception Details ===')
+      console.error('Type:', exception?.constructor?.name)
+      console.error('Message:', exception?.message)
+      console.error('Stack:', exception?.stack)
+      console.error('========================')
+    }
 
     if (exception instanceof BaseException) {
       ServerOutput['errorCode'] = exception.errorCode
