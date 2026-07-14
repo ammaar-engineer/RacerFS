@@ -13,3 +13,8 @@ export class VerifyOtpDTO {
     @IsString()
     otp!: string;
 }
+
+export class UserLoginDTO {
+    @IsEmail()
+    email!: string;
+}

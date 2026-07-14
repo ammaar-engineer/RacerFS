@@ -19,7 +19,8 @@ export const REDIS_CLIENT = "REDIS_CLIENT"
                 client.on('error', (err) => logger.error("Redis connection error", err))
                 await client.connect()
                 return client
-             }
+             },
+             inject: [ConfigService]
         }
     ],
     exports: [REDIS_CLIENT]

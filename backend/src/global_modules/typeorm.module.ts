@@ -1,7 +1,8 @@
-import {Module} from '@nestjs/common'
+import {Global, Module} from '@nestjs/common'
 import {TypeOrmModule} from '@nestjs/typeorm'
 
 
+@Global()
 @Module({
     imports: [
         TypeOrmModule.forRoot({
@@ -9,7 +10,7 @@ import {TypeOrmModule} from '@nestjs/typeorm'
             host: 'localhost',
             port: 5432,
             username: 'racerfs',
-            password: 'racerfs_password',
+            password: 'racerfs123',
             database: 'racerfs_db',
         })
     ],

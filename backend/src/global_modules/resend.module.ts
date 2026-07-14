@@ -11,7 +11,8 @@ export const RESEND_CLIENT = "RESEND_CLIENT"
             provide: RESEND_CLIENT,
             useFactory (configService: ConfigService) {
                 return new Resend(configService.get('RESEND_API_KEY'))
-            }
+            },
+            inject: [ConfigService]
         }
     ],
     exports: [RESEND_CLIENT]

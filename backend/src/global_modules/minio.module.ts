@@ -10,7 +10,7 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
       provide: 'MINIO_CLIENT',
       useFactory(configService: ConfigService) {
         return new Minio.Client({
-          endPoint: configService.get<string>('HOST_MINIO') as string,
+          endPoint: configService.get<string>('MINIO_HOST') as string,
           port: 80,
           useSSL: false,
           accessKey: configService.get<string>('MINIO_ACCESS_KEY') as string,
