@@ -25,9 +25,10 @@ export class UserController {
     @Post('register')
     async UserRegister(@Body() body: UserRegisterDTO) {
         const {email} = body
+        console.log(email)
         const emailExist = await this.mainDb.findOne({
             where: {
-                email
+                email: email
             }
         })
         if (emailExist) {
@@ -35,10 +36,10 @@ export class UserController {
         }
         
         // Generate OTP dan simpan ke Redis
-        const { sessionId, otp } = await this.userService.generateOtp(email, 'register')
+        const { sessionId, otp } = await this.userService.generateOtp('delivered@resend.dev', 'register')
         
         // Kirim OTP ke email
-        await this.userService.sendOtpCodeToEmail(email, otp, 'register')
+        await this.userService.sendOtpCodeToEmail('delivered@resend.dev', otp, 'register')
         
         return SuccessResponse("OTP Has been sent to your email", { sessionId })
     }

@@ -1,9 +1,10 @@
-import { Module, Res } from '@nestjs/common';
+import { Global, Module, Res } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import {Resend} from 'resend'
 
 export const RESEND_CLIENT = "RESEND_CLIENT"
 
+@Global()
 @Module({
     imports: [ConfigModule],
     providers: [

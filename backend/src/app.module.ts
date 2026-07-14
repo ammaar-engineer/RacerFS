@@ -4,6 +4,7 @@ import { RedisClientModule } from './global_modules/redis.module';
 import { EmailSendModule } from './global_modules/resend.module';
 import { MinIOModule } from './global_modules/minio.module';
 import { ConfigModule } from '@nestjs/config';
+import { UserRoutesModule } from './routes/user/module';
 
 @Module({
   imports: [
@@ -13,7 +14,8 @@ import { ConfigModule } from '@nestjs/config';
     AppTypeOrmModule,
     RedisClientModule,
     EmailSendModule,
-    MinIOModule
+    MinIOModule,
+    UserRoutesModule
   ],
   controllers: [],
   providers: [],

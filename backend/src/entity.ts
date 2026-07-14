@@ -8,7 +8,7 @@ import {
   JoinColumn,
 } from "typeorm";
 
-@Entity("Users")
+@Entity("User")
 export class User {
   @PrimaryGeneratedColumn()
   id!: number;
@@ -29,7 +29,7 @@ export class User {
   files!: File[];
 }
 
-@Entity("Buckets")
+@Entity("Bucket")
 export class Bucket {
   @PrimaryGeneratedColumn()
   id!: number;
@@ -51,7 +51,7 @@ export class Bucket {
   files!: File[];
 }
 
-@Entity("Snippets")
+@Entity("Snippet")
 export class Snippet {
   @PrimaryGeneratedColumn()
   id!: number;
@@ -76,7 +76,7 @@ export class Snippet {
   user!: User;
 }
 
-@Entity("Files")
+@Entity("File")
 export class File {
   @PrimaryGeneratedColumn()
   id!: number;

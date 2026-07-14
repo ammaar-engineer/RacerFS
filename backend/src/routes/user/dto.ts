@@ -2,7 +2,8 @@ import { IsEmail, IsString } from "class-validator"
 
 
 export class UserRegisterDTO {
-    @IsEmail()
+    @IsString()
+    // @IsEmail() for test
     email!: string;
 }
 

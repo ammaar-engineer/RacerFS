@@ -17,6 +17,7 @@ export class CustomGlobalException extends BaseExceptionFilter {
       data: null,
       message: "Internal server error"
     }
+    console.log(exception)
 
     if (exception instanceof BaseException) {
       ServerOutput['errorCode'] = exception.errorCode

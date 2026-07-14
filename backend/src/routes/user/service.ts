@@ -33,8 +33,8 @@ export class UserService {
         const actionText = action === 'login' ? 'login' : 'complete your registration';
         
         await this.emailService.emails.send({
-            from: 'noreply@yourdomain.com',
-            to: email,
+            from: 'Acme <onboarding@resend.dev>',
+            to: [email],
             subject: subject,
             html: `
                 <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
