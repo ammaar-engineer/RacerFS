@@ -1,62 +1,42 @@
-import { Body, Controller, Inject, Post } from "@nestjs/common";
+import { Body, Controller, Post } from "@nestjs/common";
 import { InjectRepository } from "@nestjs/typeorm";
 import { User } from "src/entity";
-import { createClient } from "redis";
-import { REDIS_CLIENT } from "src/global_modules/redis.module";
-import { RESEND_CLIENT } from "src/global_modules/resend.module";
-import { Resend } from "resend";
 import { SuccessResponse } from "src/utilities/Success.Response";
 import { UserRegisterDTO, VerifyOtpDTO, UserLoginDTO } from "./dto";
 import { Repository } from "typeorm";
-import { ConflictException, NotFoundException, UnauthorizedException } from "src/CustomExceptionHandle";
 import { UserService } from "./service";
 import { JwtService } from "src/global_services/jwt.module";
+import { UserValidationService } from "./validation";
+import { NotFoundException } from "src/CustomExceptionHandle";
 
 @Controller("user")
 export class UserController {
     constructor(
         @InjectRepository(User) private readonly mainDb: Repository<User>,
         private readonly jwtService: JwtService,
-        // @Inject(REDIS_CLIENT) private readonly redisService: ReturnType<typeof createClient>,
-        // @Inject(RESEND_CLIENT) private readonly emailService: Resend,
-        private readonly userService: UserService
+        private readonly userService: UserService,
+        private readonly validationService: UserValidationService
     ) {}
 
     @Post('register')
     async UserRegister(@Body() body: UserRegisterDTO) {
         const {email} = body
-        const emailExist = await this.mainDb.findOne({
-            where: {
-                email: email
-            }
-        })
-        if (emailExist) {
-            throw new ConflictException("Account already exists")
-        }
-        
+        // Validasi email belum terdaftar
+        await this.validationService.validateEmailNotExists(email);
         // Generate OTP dan simpan ke Redis
         const { sessionId, otp } = await this.userService.generateOtp(email, 'register')
-
         // Debug
         console.log("ISI EMAIL= ", email, otp, sessionId) 
+
         // Kirim OTP ke email
         // await this.userService.sendOtpCodeToEmail(email, otp, 'register')
-        
         return SuccessResponse("OTP Has been sent to your email", { sessionId })
     }
 
     @Post('login')
     async UserLogin(@Body() body: UserLoginDTO) {
         const {email} = body
-        // Cek apakah user ada di database
-        const user = await this.mainDb.findOne({
-            where: {
-                email
-            }
-        })
-        if (!user) {
-            throw new NotFoundException("Account not found. Please register first")
-        }
+        await this.validationService.validateEmailExists(email);
 
         // Generate OTP dan simpan ke Redis
         const { sessionId, otp } = await this.userService.generateOtp(email, 'login')
@@ -73,22 +53,25 @@ export class UserController {
     @Post("verify-otp")
     async VerifyOtp(@Body() body: VerifyOtpDTO) {
         const { sessionId, otp } = body;
-        
         // Validasi OTP menggunakan service
         const { email, action } = await this.userService.findClientOtp(sessionId, otp);
-        
+
         // If login
         if (action === 'login') {
-            const user = await this.mainDb.findOne({
-                where: { email }
-            }); 
+            const findEmail = await this.mainDb.findOne({
+            where: {
+                email: email
+            }
+            })
+            if (!findEmail) {
+                throw new NotFoundException("Email not found")
+            }
             return SuccessResponse("Login successful", { 
                 email,
-                userId: user!.id 
+                userId: this.jwtService.generateJwt({id: findEmail?.id})
             });
         }
-        
-        // If register
+
         const newUser = this.mainDb.create({ email });
         const {id} = await this.mainDb.save(newUser);
         

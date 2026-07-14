@@ -1,7 +1,6 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { INestApplication, ValidationPipe } from '@nestjs/common';
 import request from 'supertest';
-import { App } from 'supertest/types';
 import { AppModule } from '../src/app.module';
 import { CustomGlobalException } from 'src/GlobalException';
 import { ConfigService } from '@nestjs/config';
@@ -94,7 +93,7 @@ describe("User route testing", () => {
           sessionId: loginSessionId,
           otp: otp
         })
-
+      console.log(res.body)
       // Expected response for successful login verification
       expect(res.status).toBe(201)
       expect(res.body).toHaveProperty("message", "Login successful")

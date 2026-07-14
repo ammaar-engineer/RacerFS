@@ -19,35 +19,10 @@ export class User {
   @CreateDateColumn({ type: "timestamp with time zone" })
   created_at!: Date;
 
-  @OneToMany(() => Bucket, (bucket) => bucket.user, { cascade: true })
-  buckets!: Bucket[];
-
   @OneToMany(() => Snippet, (snippet) => snippet.user, { cascade: true })
   snippets!: Snippet[];
 
   @OneToMany(() => File, (file) => file.user, { cascade: true })
-  files!: File[];
-}
-
-@Entity("Bucket")
-export class Bucket {
-  @PrimaryGeneratedColumn()
-  id!: number;
-
-  @Column({ type: "varchar", length: 255 })
-  name!: string;
-
-  @Column({ type: "int" })
-  user_id!: number;
-
-  @CreateDateColumn({ type: "timestamp with time zone" })
-  created_at!: Date;
-
-  @ManyToOne(() => User, (user) => user.buckets, { onDelete: "CASCADE" })
-  @JoinColumn({ name: "user_id" })
-  user!: User;
-
-  @OneToMany(() => File, (file) => file.bucket, { cascade: true })
   files!: File[];
 }
 
@@ -98,10 +73,6 @@ export class File {
 
   @Column({ type: "varchar", length: 100, nullable: true })
   mime_type!: string | null;
-
-  @ManyToOne(() => Bucket, (bucket) => bucket.files, { onDelete: "CASCADE" })
-  @JoinColumn({ name: "bucket_id" })
-  bucket!: Bucket;
 
   @ManyToOne(() => User, (user) => user.files, { onDelete: "CASCADE" })
   @JoinColumn({ name: "user_id" })

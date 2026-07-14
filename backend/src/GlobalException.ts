@@ -23,13 +23,19 @@ export class CustomGlobalException extends BaseExceptionFilter {
       data: null,
       message: "Internal server error"
     }
-
+    console.log(this.configService.get("REDIS_URL"))
+    console.log({
+      "Kondisi env NODE_ENV": {
+        isDevelopment: this.configService.get<string>('NODE_ENV') === 'development',
+        NODE_ENV: this.configService.get<string>('NODE_ENV')
+      }
+    })
+    console.error('=== Exception Details ===')
+    console.error('Type:', exception?.constructor?.name)
+    console.error('Message:', exception?.message)
+    console.error('Stack:', exception?.stack)
+    console.error('========================')
     if (isDevelopment) {
-      console.error('=== Exception Details ===')
-      console.error('Type:', exception?.constructor?.name)
-      console.error('Message:', exception?.message)
-      console.error('Stack:', exception?.stack)
-      console.error('========================')
     }
 
     if (exception instanceof BaseException) {
