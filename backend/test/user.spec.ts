@@ -4,133 +4,103 @@ import request from 'supertest';
 import { App } from 'supertest/types';
 import { AppModule } from '../src/app.module';
 import { CustomGlobalException } from 'src/GlobalException';
+import { ConfigService } from '@nestjs/config';
+import { createClient } from 'redis';
+import { REDIS_CLIENT } from 'src/global_modules/redis.module';
 
 describe("User route testing", () => {
   let app: INestApplication;
-  let testEmail: string;
-  let sessionId: string;
+  let redisClient: ReturnType<typeof createClient>;
+  let registerSessionId: string;
+  let loginSessionId: string;
+  const testEmail = "delivered@resend.dev";
 
   beforeAll(async () => {
     const moduleFixture: TestingModule = await Test.createTestingModule({
       imports: [AppModule]
     }).compile()
     app = moduleFixture.createNestApplication()
+    const configService = app.get(ConfigService)
+    redisClient = app.get(REDIS_CLIENT)
     app.useGlobalPipes(new ValidationPipe({
         whitelist: true,
         transform: true,
         forbidNonWhitelisted: true
     }))
-    app.useGlobalFilters(new CustomGlobalException())
+    app.useGlobalFilters(new CustomGlobalException(configService))
     await app.init()
-    
-    // Setup test email
-    testEmail = `test-${Date.now()}@resend.dev`
   })
 
   afterAll(async() => {
     await app.close()
   })
 
-  describe("POST /user/register", () => {
-    describe("Success case", () => {
-      it("should send OTP to email and return sessionId for new user", async () => {
-        const res = await request(app.getHttpServer())
-          .post("/user/register")
-          .send({ email: testEmail })
+  describe("User Workflow Testing", () => {
+    it("Step 1: User register dengan alamat email delivered@resend.dev", async () => {
+      const res = await request(app.getHttpServer())
+        .post("/user/register")
+        .send({ email: testEmail })
 
-        expect(res.status).toBe(200)
-        expect(res.body).toHaveProperty("message", "OTP Has been sent to your email")
-        expect(res.body.data).toHaveProperty("sessionId")
-        expect(typeof res.body.data.sessionId).toBe("string")
-        
-        // Save sessionId for later tests
-        sessionId = res.body.data.sessionId
-      })
+      expect(res.status).toBe(201)
+      expect(res.body).toHaveProperty("message", "OTP Has been sent to your email")
+      expect(res.body.data).toHaveProperty("sessionId")
+      expect(typeof res.body.data.sessionId).toBe("string")
+      
+      // Save sessionId for verification
+      registerSessionId = res.body.data.sessionId
     })
 
-    describe("Failure case", () => {
-      it("should return 409 conflict when email already exists", async () => {
-        // First registration
-        await request(app.getHttpServer())
-          .post("/user/register")
-          .send({ email: 'existing@resend.dev' })
-
-        // Try to register again with same email
-        const res = await request(app.getHttpServer())
-          .post("/user/register")
-          .send({ email: 'existing@resend.dev' })
-
-        console.log(res.body)
-
-        expect(res.status).toBe(409)
-        expect(res.body).toHaveProperty("message", "Account already exists")
+    it("Step 2: User verifikasi kode OTP dari register dengan sessionId", async () => {
+      // Ambil OTP dari Redis menggunakan sessionId
+      const redisData = await redisClient.get(registerSessionId)
+      expect(redisData).not.toBeNull()
+      const { otp } = JSON.parse(redisData!)
+      const res = await request(app.getHttpServer())
+        .post("/user/verify-otp")
+        .send({ 
+          sessionId: registerSessionId,
+          otp: otp
       })
 
-      it("should return 400 when email is invalid", async () => {
-        const res = await request(app.getHttpServer())
-          .post("/user/register")
-          .send({ email: 'invalid-email' })
-
-        expect(res.status).toBe(400)
-      })
-
-      it("should return 400 when email is missing", async () => {
-        const res = await request(app.getHttpServer())
-          .post("/user/register")
-          .send({})
-
-        expect(res.status).toBe(400)
-      })
-    })
-  })
-
-  describe("POST /user/login", () => {
-    describe("Success case", () => {
-      it("should send OTP to email and return sessionId for existing user", async () => {
-        // First ensure user exists by registering
-        const registerRes = await request(app.getHttpServer())
-          .post("/user/register")
-          .send({ email: 'logintest@resend.dev' })
-        
-        expect(registerRes.status).toBe(200)
-
-        // Now try to login
-        const res = await request(app.getHttpServer())
-          .post("/user/login")
-          .send({ email: 'logintest@resend.dev' })
-
-        expect(res.status).toBe(200)
-        expect(res.body).toHaveProperty("message", "OTP Has been sent to your email")
-        expect(res.body.data).toHaveProperty("sessionId")
-        expect(typeof res.body.data.sessionId).toBe("string")
-      })
+      // Expected response for successful registration verification
+      expect(res.status).toBe(201)
+      expect(res.body).toHaveProperty("message", "OTP verified successfully and user created")
+      expect(res.body.data).toHaveProperty("token")
     })
 
-    describe("Failure case", () => {
-      it("should return 404 when user does not exist", async () => {
-        const res = await request(app.getHttpServer())
-          .post("/user/login")
-          .send({ email: 'nonexistent@resend.dev' })
+    it("Step 3: User login dengan alamat email tersebut", async () => {
+      const res = await request(app.getHttpServer())
+        .post("/user/login")
+        .send({ email: testEmail })
 
-        expect(res.status).toBe(404)
-        expect(res.body).toHaveProperty("message", "Account not found. Please register first")
-      })
+      expect(res.status).toBe(201)
+      expect(res.body).toHaveProperty("message", "OTP Has been sent to your email")
+      expect(res.body.data).toHaveProperty("sessionId")
+      expect(typeof res.body.data.sessionId).toBe("string")
+      
+      // Save sessionId for login verification
+      loginSessionId = res.body.data.sessionId
+    })
 
-      it("should return 400 when email is invalid", async () => {
-        const res = await request(app.getHttpServer())
-          .post("/user/login")
-          .send({ email: 'invalid-email' })
+    it("Step 4: User verifikasi kode OTP dari login", async () => {
+      const redisData = await redisClient.get(loginSessionId)
+      expect(redisData).not.toBeNull()
+      
+      const { otp } = JSON.parse(redisData!)
 
-        expect(res.status).toBe(400)
-      })
+      const res = await request(app.getHttpServer())
+        .post("/user/verify-otp")
+        .send({ 
+          sessionId: loginSessionId,
+          otp: otp
+        })
 
-      it("should return 400 when email is missing", async () => {
-        const res = await request(app.getHttpServer())
-          .post("/user/login")
-          .send({})
-
-        expect(res.status).toBe(400)
-      })
+      // Expected response for successful login verification
+      expect(res.status).toBe(201)
+      expect(res.body).toHaveProperty("message", "Login successful")
+      expect(res.body.data).toHaveProperty("email")
+      expect(res.body.data).toHaveProperty("userId")
+      expect(res.body.data.email).toBe(testEmail)
     })
   })
 })

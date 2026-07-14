@@ -38,7 +38,7 @@ export class UserController {
         const { sessionId, otp } = await this.userService.generateOtp(email, 'register')
 
         // Debug
-        console.log("ISI EMAIL= ", email, otp) 
+        console.log("ISI EMAIL= ", email, otp, sessionId) 
         // Kirim OTP ke email
         // await this.userService.sendOtpCodeToEmail(email, otp, 'register')
         
@@ -62,7 +62,7 @@ export class UserController {
         const { sessionId, otp } = await this.userService.generateOtp(email, 'login')
         
         // Buat debug
-        console.log("ISI EMAIL= ", email, otp) 
+        console.log("ISI EMAIL= ", email, otp, sessionId) 
 
         // Kirim OTP ke email
         // await this.userService.sendOtpCodeToEmail(email, otp, 'login')
@@ -81,8 +81,7 @@ export class UserController {
         if (action === 'login') {
             const user = await this.mainDb.findOne({
                 where: { email }
-            });
-            
+            }); 
             return SuccessResponse("Login successful", { 
                 email,
                 userId: user!.id 
@@ -94,7 +93,7 @@ export class UserController {
         const {id} = await this.mainDb.save(newUser);
         
         return SuccessResponse("OTP verified successfully and user created", { 
-            token: "token"
+            token: this.jwtService.generateJwt({id})
         });
     }
 

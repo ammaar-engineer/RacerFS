@@ -18,18 +18,16 @@ export class JwtService {
     /**
      * Generate JWT token
      * @param payload Object containing data to be encoded in the token
-     * @param expiresIn Token expiration time (default: '7d')
+     * @param expiresIn Token expiration time in seconds (default: 691200 = 8 days)
      * @returns JWT token string
      */
-    generateJwt(payload: object | string, expireTime: string = '8d'): string {
-        if (typeof payload == 'object') {
-            return jwt.sign(JSON.stringify(payload), this.secretKey, {
-                expiresIn: expireTime as any
-            });
-        }
-        return jwt.sign(payload, this.secretKey, {
-            expiresIn: expireTime as any
-        })
+    generateJwt(payload: object | string, expireTime: number = 691200): string {
+        // Pastikan string JSON di-parse menjadi object agar klaim 'expiresIn' bisa ditanam oleh library
+        const formattedPayload = typeof payload === 'string' ? JSON.parse(payload) : payload;
+
+        return jwt.sign(formattedPayload, this.secretKey, {
+            expiresIn: expireTime
+        });
     }
 
     /**
