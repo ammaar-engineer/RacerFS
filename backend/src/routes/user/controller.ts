@@ -62,13 +62,13 @@ export class UserController {
             }
             return SuccessResponse("Login successful", { 
                 email,
-                userId: this.jwtService.generateJwt({id: findEmail?.id})
+                userId: this.jwtService.generateJwt({userId: findEmail?.id})
             });
         }
         const newUser = this.mainDb.create({ email });
         const {id} = await this.mainDb.save(newUser);
         return SuccessResponse("OTP verified successfully and user created", { 
-            token: this.jwtService.generateJwt({id})
+            token: this.jwtService.generateJwt({userId: id})
         });
     }
 

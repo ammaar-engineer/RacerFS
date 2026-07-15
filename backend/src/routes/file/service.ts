@@ -13,14 +13,16 @@ export class FileRouteService {
         @Inject(MINIO_CLIENT) private readonly minioService: MinIOModuleType,
         @InjectRepository(File) private readonly fileRepo: Repository<File>
     ) {}
-    async uploadFIle(
+    async uploadFile(
         req: Request,
-        fileName: string
+        fileName: string,
+        userId: number
     ) {
         // Check file existence
         const fileExist = await this.fileRepo.findOne({
             where: {
-                name: fileName
+                name: fileName,
+                user_id: userId
             }
         })
         if (fileExist) {
@@ -39,13 +41,38 @@ export class FileRouteService {
                 'racerfs_bucket',
                 fileName,
                 passThroughStream,
-                fileSize
+                fileSize,
+                {
+                    "Content-Type": "application/octet-stream"
+                }
             )
         } catch (error) {
             throw new InternalServerErrorException("Error while uploading to storage");
         }
         // Note in db
-        const noteFile = await this.fileRepo
-
+        const newFile = new File()
+        newFile.name = fileName
+        newFile.size = fileSize
+        newFile.user_id = userId
+        newFile.is_public = false
+        this.fileRepo.save(newFile)
+        // Return
+        return fileName
+    }
+    async getUserFileList(userId: number) {
+        const fileList = await this.fileRepo.find({
+            where: {
+                user_id: userId
+            },
+            order: {
+                uploaded_at: 'DESC'
+            }
+        })
+        return fileList.map(data => ({
+            id: data.id,
+            name: data.name,
+            size: data.size,
+            uploaded_at: data.uploaded_at
+        }))
     }
 }
