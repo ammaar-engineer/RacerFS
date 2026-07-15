@@ -36,6 +36,22 @@ services:
         limits:
           memory: 512M
 
+  minio-init:
+    image: minio/mc
+    depends_on:
+      - MinIO
+    entrypoint: >
+      /bin/sh -c "
+      until (/usr/bin/mc alias set local http://MinIO:9000 minioadmin minioadmin123); do echo 'Waiting for MinIO...'; sleep 1; done;
+      if ! /usr/bin/mc ls local/racerfs_bucket > /dev/null 2>&1; then
+        /usr/bin/mc mb local/racerfs_bucket;
+        /usr/bin/mc anonymous set download local/racerfs_bucket;
+        echo 'Bucket racerfs_bucket created with public-read policy.';
+      else
+        echo 'Bucket racerfs_bucket already exists.';
+      fi
+      "
+
   redis:
     image: redis:7-alpine
     container_name: racerfs-redis

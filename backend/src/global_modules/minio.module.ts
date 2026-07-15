@@ -2,12 +2,14 @@ import * as Minio from 'minio';
 import { Module, Global } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 
+export type MinIOModuleType = Minio.Client
+export const MINIO_CLIENT = "MINIO_CLIENT"
 @Global()
 @Module({
   imports: [ConfigModule],
   providers: [
     {
-      provide: 'MINIO_CLIENT',
+      provide: MINIO_CLIENT,
       useFactory(configService: ConfigService) {
         return new Minio.Client({
           endPoint: configService.get<string>('MINIO_HOST') as string,
@@ -21,6 +23,6 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
       inject: [ConfigService]
     }
   ],
-  exports: ['MINIO_CLIENT']
+  exports: [MINIO_CLIENT]
 })
 export class MinIOModule { }

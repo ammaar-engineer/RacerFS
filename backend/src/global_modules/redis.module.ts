@@ -3,8 +3,8 @@ import { createClient } from "redis";
 import {ConfigModule, ConfigService} from '@nestjs/config'
 
 
+export type RedisModuleType = ReturnType<typeof createClient>
 export const REDIS_CLIENT = "REDIS_CLIENT"
-
 @Global()
 @Module({
     imports: [ConfigModule],

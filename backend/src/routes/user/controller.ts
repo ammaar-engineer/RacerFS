@@ -27,9 +27,8 @@ export class UserController {
         const { sessionId, otp } = await this.userService.generateOtp(email, 'register')
         // Debug
         console.log("ISI EMAIL= ", email, otp, sessionId) 
-
         // Kirim OTP ke email
-        // await this.userService.sendOtpCodeToEmail(email, otp, 'register')
+        await this.userService.sendOtpCodeToEmail(email, otp, 'register')
         return SuccessResponse("OTP Has been sent to your email", { sessionId })
     }
 
@@ -37,16 +36,12 @@ export class UserController {
     async UserLogin(@Body() body: UserLoginDTO) {
         const {email} = body
         await this.validationService.validateEmailExists(email);
-
         // Generate OTP dan simpan ke Redis
         const { sessionId, otp } = await this.userService.generateOtp(email, 'login')
-        
         // Buat debug
         console.log("ISI EMAIL= ", email, otp, sessionId) 
-
         // Kirim OTP ke email
-        // await this.userService.sendOtpCodeToEmail(email, otp, 'login')
-        
+        await this.userService.sendOtpCodeToEmail(email, otp, 'login')
         return SuccessResponse("OTP Has been sent to your email", { sessionId })
     }
 
@@ -55,13 +50,12 @@ export class UserController {
         const { sessionId, otp } = body;
         // Validasi OTP menggunakan service
         const { email, action } = await this.userService.findClientOtp(sessionId, otp);
-
         // If login
         if (action === 'login') {
             const findEmail = await this.mainDb.findOne({
-            where: {
-                email: email
-            }
+                where: {
+                    email: email
+                }
             })
             if (!findEmail) {
                 throw new NotFoundException("Email not found")
@@ -71,10 +65,8 @@ export class UserController {
                 userId: this.jwtService.generateJwt({id: findEmail?.id})
             });
         }
-
         const newUser = this.mainDb.create({ email });
         const {id} = await this.mainDb.save(newUser);
-        
         return SuccessResponse("OTP verified successfully and user created", { 
             token: this.jwtService.generateJwt({id})
         });
