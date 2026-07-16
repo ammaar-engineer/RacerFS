@@ -9,8 +9,8 @@ import {
 } from "typeorm";
 
 export enum TokenType {
-  "private_access_token" = "private_access_token",
-  "public_access_token" = "public_access_token",
+  "file_access_token" = "file_access_token",
+  "account_token"="account_token"
 }
 
 @Entity('Token')

@@ -7,12 +7,14 @@ import type { Request, Response } from "express";
 import { SuccessResponse } from "src/utilities/Success.Response";
 import { JwtService } from "src/global_services/jwt.module";
 import { UnauthorizedException } from "src/CustomExceptionHandle";
+import { FileRouteValidations } from "./validation";
 
 @Controller("file")
 export class FileRouteController {
     constructor(
         private readonly fileServices: FileRouteService,
-        private readonly jwtService: JwtService
+        private readonly jwtService: JwtService,
+        private readonly fileRouteValidation: FileRouteValidations
     ) {}
     @Get("list")
     async getFileList(
@@ -29,14 +31,20 @@ export class FileRouteController {
         const queryDto = plainToInstance(FileListQueryDTO, query, {
             excludeExtraneousValues: false
         })
-        const ownerId = queryDto['ownerId']
-        // Jwt
-        const {user_id, type} = this.jwtService.verifyJwt<{user_id: number, type: string}>(token)
-        if (!user_id || type == "auth_token") {
-            throw new UnauthorizedException("Unvalid token to access file list")
+        const accessToken = queryDto['accessToken']
+        // Extract both token
+        const accountTokenValue = this.jwtService.verifyJwt<{user_id: number, type: string}>(token)
+        if (!accountTokenValue.user_id || accountTokenValue.type !== "account_token") {
+            throw new UnauthorizedException("Invalid token to acce")
         }
+        const accessTokenValue = this.jwtService.verifyJwt<{type: 'file_access_token'}>(accessToken)
+        if (accessTokenValue.type !== 'file_access_token') {
+            throw new UnauthorizedException("Invalid access token")
+        }
+        // Check access token owner id
+        const accessTokenOwnerId = (await this.fileRouteValidation.checkAccessTokenExist(accessToken)).user_id
         // Service
-        const fileList = await this.fileServices.getUserFileList(user_id)
+        const fileList = await this.fileServices.getUserFileList(accountTokenValue.user_id, accessTokenOwnerId)
         // Return
         return SuccessResponse("File list retrieved successfully", fileList)
     }

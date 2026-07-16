@@ -70,20 +70,19 @@ export class UserController {
         // Insert user
         const newUser = this.userRepo.create({ email });
         const {id} = await this.userRepo.save(newUser);
-        // Insert private access token for first user
+        // Insert file access token for first user
         const createPrivateToken = this.tokenRepo.create({
             token: this.jwtService.generateJwt({
-                token_owner_id: id,
-                type: "private_access_token"
+                type: "file_access_token"
             }),
             user_id: id,
-            type: "private_access_token"
+            type: "file_access_token"
         })
         await this.tokenRepo.save(createPrivateToken)
         // Create auth token
         const jwtToken = this.jwtService.generateJwt({
             user_id: id,
-            type: "user_token"
+            type: "account_token"
         })
         return SuccessResponse("OTP verified successfully and user created", { 
             token: jwtToken

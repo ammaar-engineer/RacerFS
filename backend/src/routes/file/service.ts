@@ -6,12 +6,14 @@ import { type Request } from "express";
 import { MINIO_CLIENT, type MinIOModuleType } from "src/global_modules/minio.module";
 import { PassThrough } from "stream";
 import { Repository } from "typeorm";
+import { FileRouteValidations } from "./validation";
 
 @Injectable()
 export class FileRouteService {
     constructor(
         @Inject(MINIO_CLIENT) private readonly minioService: MinIOModuleType,
-        @InjectRepository(File) private readonly fileRepo: Repository<File>
+        @InjectRepository(File) private readonly fileRepo: Repository<File>,
+        private readonly fileRouteValidation: FileRouteValidations
     ) {}
     async uploadFile(
         req: Request,
@@ -59,16 +61,16 @@ export class FileRouteService {
         // Return
         return fileName
     }
-    async getUserFileList(userId: number, ownerId: number) {
+    async getUserFileList(userId: number, accessTokenOwnerId: number) {
+        const whereValidation = userId == accessTokenOwnerId 
+            ? {user_id: userId}
+            : {user_id: userId, is_public: true}
         const fileList = await this.fileRepo.find({
-            where: {
-                user_id: userId
-            },
+            where: whereValidation,
             order: {
                 uploaded_at: 'DESC'
             }
         })
-        if ()
         return fileList.map(data => ({
             id: data.id,
             name: data.name,

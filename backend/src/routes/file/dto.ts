@@ -8,14 +8,16 @@ export class FileUploadQueryDTO {
     @IsString()
     fileName!: string
 }
+
 export class FileListHeaderDTO {
     @IsString()
     "authorization"!: string
 }
 export class FileListQueryDTO {
     @IsString()
-    "ownerId"!: string
+    "accessToken"!: string
 }
+
 export class FileDownloadHeaderDTO {
     @IsString()
     "authorization"!: string
