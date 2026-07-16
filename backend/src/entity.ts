@@ -8,18 +8,26 @@ import {
   JoinColumn,
 } from "typeorm";
 
+export enum TokenType {
+  "private_access_token" = "private_access_token",
+  "public_access_token" = "public_access_token",
+}
+
 @Entity('Token')
 export class Token {
   @PrimaryGeneratedColumn()
   id!: string;
 
   @Column()
-  name!: string;
+  token!: string;
 
   @Column({ type: 'int', name: 'user_id' })
   user_id!: number;
 
-  @Column()
+  @Column({
+    type: 'enum',
+    enum: TokenType,
+  })
   type!: string;
 
   @ManyToOne(() => User, (user) => user.tokens, { onDelete: 'CASCADE' })
@@ -38,6 +46,7 @@ export class User {
   @CreateDateColumn({ type: "timestamp with time zone" })
   created_at!: Date;
 
+  // Relations
   @OneToMany(() => Snippet, (snippet) => snippet.user, { cascade: true })
   snippets!: Snippet[];
 

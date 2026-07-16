@@ -1,11 +1,12 @@
 import { Controller, Get, Headers, Param, Patch, Post, Query, Req, Res } from "@nestjs/common";
 import { plainToInstance } from "class-transformer";
-import { FileDownloadHeaderDTO, FileListHeaderDTO, FileUploadHeadersDTO, FileUploadQueryDTO } from "./dto";
+import { FileListHeaderDTO, FileListQueryDTO, FileUploadHeadersDTO, FileUploadQueryDTO } from "./dto";
 import { validateOrReject } from "class-validator";
 import { FileRouteService } from "./service";
 import type { Request, Response } from "express";
 import { SuccessResponse } from "src/utilities/Success.Response";
 import { JwtService } from "src/global_services/jwt.module";
+import { UnauthorizedException } from "src/CustomExceptionHandle";
 
 @Controller("file")
 export class FileRouteController {
@@ -15,7 +16,8 @@ export class FileRouteController {
     ) {}
     @Get("list")
     async getFileList(
-        @Headers() headers: Record<string, string>
+        @Headers() headers: Record<string, string>,
+        @Query() query: Record<string, string>
     ) {
         // Validate headers and data
         const headerPto = plainToInstance(FileListHeaderDTO, headers, {
@@ -23,10 +25,18 @@ export class FileRouteController {
         })
         await validateOrReject(headerPto)
         const token = headerPto['authorization']
+        // Validate query and data
+        const queryDto = plainToInstance(FileListQueryDTO, query, {
+            excludeExtraneousValues: false
+        })
+        const ownerId = queryDto['ownerId']
         // Jwt
-        const {userId} = this.jwtService.verifyJwt<{userId: number}>(token)
+        const {user_id, type} = this.jwtService.verifyJwt<{user_id: number, type: string}>(token)
+        if (!user_id || type == "auth_token") {
+            throw new UnauthorizedException("Unvalid token to access file list")
+        }
         // Service
-        const fileList = await this.fileServices.getUserFileList(userId)
+        const fileList = await this.fileServices.getUserFileList(user_id)
         // Return
         return SuccessResponse("File list retrieved successfully", fileList)
     }

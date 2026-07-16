@@ -1,6 +1,6 @@
 import { Body, Controller, Post } from "@nestjs/common";
 import { InjectRepository } from "@nestjs/typeorm";
-import { User } from "src/entity";
+import { Token, User } from "src/entity";
 import { SuccessResponse } from "src/utilities/Success.Response";
 import { UserRegisterDTO, VerifyOtpDTO, UserLoginDTO } from "./dto";
 import { Repository } from "typeorm";
@@ -12,10 +12,11 @@ import { NotFoundException } from "src/CustomExceptionHandle";
 @Controller("user")
 export class UserController {
     constructor(
-        @InjectRepository(User) private readonly mainDb: Repository<User>,
+        @InjectRepository(User) private readonly userRepo: Repository<User>,
         private readonly jwtService: JwtService,
         private readonly userService: UserService,
-        private readonly validationService: UserValidationService
+        private readonly validationService: UserValidationService,
+        @InjectRepository(Token) private readonly tokenRepo: Repository<Token>
     ) {}
 
     @Post('register')
@@ -52,7 +53,7 @@ export class UserController {
         const { email, action } = await this.userService.findClientOtp(sessionId, otp);
         // If login
         if (action === 'login') {
-            const findEmail = await this.mainDb.findOne({
+            const findEmail = await this.userRepo.findOne({
                 where: {
                     email: email
                 }
@@ -62,13 +63,30 @@ export class UserController {
             }
             return SuccessResponse("Login successful", { 
                 email,
-                userId: this.jwtService.generateJwt({userId: findEmail?.id})
+                userId: this.jwtService.generateJwt({user_id: findEmail?.id})
             });
         }
-        const newUser = this.mainDb.create({ email });
-        const {id} = await this.mainDb.save(newUser);
+        // Register
+        // Insert user
+        const newUser = this.userRepo.create({ email });
+        const {id} = await this.userRepo.save(newUser);
+        // Insert private access token for first user
+        const createPrivateToken = this.tokenRepo.create({
+            token: this.jwtService.generateJwt({
+                token_owner_id: id,
+                type: "private_access_token"
+            }),
+            user_id: id,
+            type: "private_access_token"
+        })
+        await this.tokenRepo.save(createPrivateToken)
+        // Create auth token
+        const jwtToken = this.jwtService.generateJwt({
+            user_id: id,
+            type: "user_token"
+        })
         return SuccessResponse("OTP verified successfully and user created", { 
-            token: this.jwtService.generateJwt({userId: id})
+            token: jwtToken
         });
     }
 

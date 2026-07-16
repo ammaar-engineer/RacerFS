@@ -59,7 +59,7 @@ export class FileRouteService {
         // Return
         return fileName
     }
-    async getUserFileList(userId: number) {
+    async getUserFileList(userId: number, ownerId: number) {
         const fileList = await this.fileRepo.find({
             where: {
                 user_id: userId
@@ -68,6 +68,7 @@ export class FileRouteService {
                 uploaded_at: 'DESC'
             }
         })
+        if ()
         return fileList.map(data => ({
             id: data.id,
             name: data.name,
