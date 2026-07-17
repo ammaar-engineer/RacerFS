@@ -29,10 +29,12 @@ export class FileEditHeaderDTO {
     @IsString()
     "access-token"!: string
 }
-
 export class FileEditQueryDTO {
     @IsString()
-    fileId!: string
+    fileKey!: string
+
+    @IsString()
+    "new-name"!: string
 }
 
 export class FileDownloadHeaderDTO {

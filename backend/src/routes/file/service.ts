@@ -1,6 +1,6 @@
 import { Inject, Injectable } from "@nestjs/common";
 import { InjectRepository } from "@nestjs/typeorm";
-import { ConflictException, InternalServerErrorException } from "src/CustomExceptionHandle";
+import { ConflictException, InternalServerErrorException, NotFoundException } from "src/CustomExceptionHandle";
 import { File } from "src/entity";
 import { type Request } from "express";
 import { MINIO_CLIENT, type MinIOModuleType } from "src/global_modules/minio.module";
@@ -15,8 +15,29 @@ export class FileRouteService {
         @InjectRepository(File) private readonly fileRepo: Repository<File>,
         private readonly fileRouteValidation: FileRouteValidations
     ) {}
-    async editFile() {
+    async WsEvent_UPLOADING() {
+
+    }
+    async WsEvent_SUCCESS() {
+
+    }
+    async WsEvent_FAILED() {
         
+    }
+    async renameFile(fileKey: string, newName: string) {
+        const fileExist = await this.fileRepo.findOne({
+            where: {
+                file_key: fileKey
+            },
+            loadEagerRelations: false
+        })
+        if (!fileExist) {
+            throw new NotFoundException("File not found")
+        }
+        await this.fileRepo.update({file_key: fileKey}, {name: newName})
+        return {
+            oldName: fileExist.name,
+        }
     }
 
     async uploadFile(

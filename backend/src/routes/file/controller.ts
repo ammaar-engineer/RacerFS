@@ -46,7 +46,7 @@ export class FileRouteController {
 
     }
 
-    @Patch("edit")
+    @Patch("rename")
     async editFile(
         @Headers() headers: Record<string, string>,
         @Query() query: Record<string, string>,
@@ -60,29 +60,29 @@ export class FileRouteController {
         // Query validation
         const queryDto = (await this.fileRouteValidation.customDtoValidation(FileEditQueryDTO, query))
         // Service
-
+        const editFile = await this.fileServices.renameFile(queryDto.fileKey, queryDto["new-name"])
         // Return
-        return SuccessResponse(`File with ID ${queryDto.fileId} has been updated`)
+        return SuccessResponse(`File with ID ${editFile.oldName} has been renamed`)
     }
 
-    @Post("upload")
-    async uploadFile(
-        @Headers() headers: Record<string, string>,
-        @Req() req: Request
-    ) {
-        // Validate headers
-        const { accountTokenData, accessTokenData } = await this.fileRouteValidation.validateDualTokenHeaders(
-            headers,
-            FileUploadHeadersDTO
-        )
-        const fileName = (await this.fileRouteValidation.customDtoValidation(FileUploadHeadersDTO, headers))["x-file-name"]
+    // @Post("upload")
+    // async uploadFile(
+    //     @Headers() headers: Record<string, string>,
+    //     @Req() req: Request
+    // ) {
+    //     // Validate headers
+    //     const { accountTokenData, accessTokenData } = await this.fileRouteValidation.validateDualTokenHeaders(
+    //         headers,
+    //         FileUploadHeadersDTO
+    //     )
+    //     const fileName = (await this.fileRouteValidation.customDtoValidation(FileUploadHeadersDTO, headers))["x-file-name"]
         
-        // Service
-        await this.fileServices.uploadFile(req, fileName, 4)
+    //     // Service
+    //     await this.fileServices.uploadFile(req, fileName, 4)
         
-        // Return
-        return SuccessResponse(`File ${fileName} has been uploaded`)
-    }
+    //     // Return
+    //     return SuccessResponse(`File ${fileName} has been uploaded`)
+    // }
 
     @Post("generate-access-token")
     async generatePermissionKey() {}

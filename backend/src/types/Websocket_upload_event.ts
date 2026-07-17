@@ -1,0 +1,1 @@
+export type WebSocketUploadEvent = "UPLOADING" | "SUCCESS" | "FAILED"
