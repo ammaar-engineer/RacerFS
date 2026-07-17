@@ -15,6 +15,10 @@ export class FileRouteService {
         @InjectRepository(File) private readonly fileRepo: Repository<File>,
         private readonly fileRouteValidation: FileRouteValidations
     ) {}
+    async editFile() {
+        
+    }
+
     async uploadFile(
         req: Request,
         fileName: string,

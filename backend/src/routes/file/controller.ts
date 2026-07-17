@@ -1,50 +1,38 @@
 import { Controller, Get, Headers, Param, Patch, Post, Query, Req, Res } from "@nestjs/common";
 import { plainToInstance } from "class-transformer";
-import { FileListHeaderDTO, FileListQueryDTO, FileUploadHeadersDTO, FileUploadQueryDTO } from "./dto";
+import { FileListHeaderDTO, FileUploadHeadersDTO, FileUploadQueryDTO, FileEditHeaderDTO, FileEditQueryDTO } from "./dto";
 import { validateOrReject } from "class-validator";
 import { FileRouteService } from "./service";
 import type { Request, Response } from "express";
 import { SuccessResponse } from "src/utilities/Success.Response";
 import { JwtService } from "src/global_services/jwt.module";
-import { UnauthorizedException } from "src/CustomExceptionHandle";
 import { FileRouteValidations } from "./validation";
+import { InjectRepository } from "@nestjs/typeorm";
+import { Token } from "src/entity";
+import { Repository } from "typeorm";
 
 @Controller("file")
 export class FileRouteController {
     constructor(
         private readonly fileServices: FileRouteService,
         private readonly jwtService: JwtService,
-        private readonly fileRouteValidation: FileRouteValidations
+        private readonly fileRouteValidation: FileRouteValidations,
+        @InjectRepository(Token) private readonly tokenRepo: Repository<Token>,
     ) {}
     @Get("list")
     async getFileList(
         @Headers() headers: Record<string, string>,
-        @Query() query: Record<string, string>
     ) {
-        // Validate headers and data
-        const headerPto = plainToInstance(FileListHeaderDTO, headers, {
-            excludeExtraneousValues: false
-        })
-        await validateOrReject(headerPto)
-        const token = headerPto['authorization']
-        // Validate query and data
-        const queryDto = plainToInstance(FileListQueryDTO, query, {
-            excludeExtraneousValues: false
-        })
-        const accessToken = queryDto['accessToken']
-        // Extract both token
-        const accountTokenValue = this.jwtService.verifyJwt<{user_id: number, type: string}>(token)
-        if (!accountTokenValue.user_id || accountTokenValue.type !== "account_token") {
-            throw new UnauthorizedException("Invalid token to acce")
-        }
-        const accessTokenValue = this.jwtService.verifyJwt<{type: 'file_access_token'}>(accessToken)
-        if (accessTokenValue.type !== 'file_access_token') {
-            throw new UnauthorizedException("Invalid access token")
-        }
-        // Check access token owner id
-        const accessTokenOwnerId = (await this.fileRouteValidation.checkAccessTokenExist(accessToken)).user_id
+        // Validate headers
+        const { accountTokenData, accessTokenData, accessTokenOwner } = await this.fileRouteValidation.validateDualTokenHeaders(
+            headers,
+            FileListHeaderDTO,
+            {validateOwner: true}
+        )
+
         // Service
-        const fileList = await this.fileServices.getUserFileList(accountTokenValue.user_id, accessTokenOwnerId)
+        const fileList = await this.fileServices.getUserFileList(accountTokenData.value.user_id, accessTokenOwner.user_id)
+        
         // Return
         return SuccessResponse("File list retrieved successfully", fileList)
     }
@@ -55,37 +43,47 @@ export class FileRouteController {
         @Query() query: Record<string, string>,
         @Res() res: Response
     ) {
+
     }
 
     @Patch("edit")
-    async editFile() {}
+    async editFile(
+        @Headers() headers: Record<string, string>,
+        @Query() query: Record<string, string>,
+    ) {
+        // Validate headers and validate token
+        const { accessTokenData, accountTokenData } = await this.fileRouteValidation.validateDualTokenHeaders(
+            headers,
+            FileEditHeaderDTO,
+            { validateOwner: true }
+        )
+        // Query validation
+        const queryDto = (await this.fileRouteValidation.customDtoValidation(FileEditQueryDTO, query))
+        // Service
+
+        // Return
+        return SuccessResponse(`File with ID ${queryDto.fileId} has been updated`)
+    }
 
     @Post("upload")
     async uploadFile(
         @Headers() headers: Record<string, string>,
-        @Query() query: Record<string, string>,
         @Req() req: Request
     ) {
-        // Headers validation and data
-        const headerDto = plainToInstance(FileUploadHeadersDTO, headers, {
-            excludeExtraneousValues: false
-        })
-        await validateOrReject(headerDto)
-        const token = headerDto['authorization']
-        // Query validation and data
-        const queryDto = plainToInstance(FileUploadQueryDTO, query, {
-            excludeExtraneousValues: false
-        })
-        await validateOrReject(queryDto)
-        const fileName = queryDto.fileName
-        // Jwt
-        const jwtValue = this.jwtService.verifyJwt<{userId: number}>(token)
-        // service
-        await this.fileServices.uploadFile(req, fileName, jwtValue.userId)
-        // end
+        // Validate headers
+        const { accountTokenData, accessTokenData } = await this.fileRouteValidation.validateDualTokenHeaders(
+            headers,
+            FileUploadHeadersDTO
+        )
+        const fileName = (await this.fileRouteValidation.customDtoValidation(FileUploadHeadersDTO, headers))["x-file-name"]
+        
+        // Service
+        await this.fileServices.uploadFile(req, fileName, 4)
+        
+        // Return
         return SuccessResponse(`File ${fileName} has been uploaded`)
     }
 
-    @Post("generate-permission")
+    @Post("generate-access-token")
     async generatePermissionKey() {}
 }

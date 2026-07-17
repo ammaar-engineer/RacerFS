@@ -96,6 +96,9 @@ export class File {
   @Column({type: 'boolean', default: false})
   is_public!: boolean
 
+  @Column({type: 'varchar', length: 50})
+  minio_path!: string
+
   @CreateDateColumn({ type: "timestamp with time zone" })
   uploaded_at!: Date;
 

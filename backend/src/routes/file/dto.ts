@@ -3,7 +3,12 @@ import { IsString } from "class-validator";
 export class FileUploadHeadersDTO {
     @IsString()
     "authorization"!: string
+    @IsString()
+    "access-token"!: string
+    @IsString()
+    "x-file-name"!: string
 }
+
 export class FileUploadQueryDTO {
     @IsString()
     fileName!: string
@@ -12,16 +17,29 @@ export class FileUploadQueryDTO {
 export class FileListHeaderDTO {
     @IsString()
     "authorization"!: string
-}
-export class FileListQueryDTO {
     @IsString()
-    "accessToken"!: string
+    "access-token"!: string
+    @IsString()
+    "file-name"!: string
+}
+
+export class FileEditHeaderDTO {
+    @IsString()
+    "authorization"!: string
+    @IsString()
+    "access-token"!: string
+}
+
+export class FileEditQueryDTO {
+    @IsString()
+    fileId!: string
 }
 
 export class FileDownloadHeaderDTO {
     @IsString()
     "authorization"!: string
 }
+
 export class FileDownloadQueryDTO {
     @IsString()
     fileName!: string
