@@ -1,18 +1,18 @@
 import {Module} from '@nestjs/common'
 import { UserController } from './controller'
-import { UserService } from './service'
 import { TypeOrmModule } from '@nestjs/typeorm'
 import { User } from 'src/entity'
 import { JwtModule } from 'src/global_services/jwt.module'
-import { UserValidationModule } from './validation'
+import { UserDbModules } from './db'
+import { UserBridgeModules } from './bridge/main.bridge'
+import { SessionBridgeModules } from './bridge/session.bridge'
 
 @Module({
     imports: [
         TypeOrmModule.forFeature([User]),
         JwtModule,
-        UserValidationModule,
     ],
     controllers: [UserController],
-    providers: [UserService]
+    providers: [UserDbModules, UserBridgeModules, SessionBridgeModules]
 })
 export class UserRoutesModule {}

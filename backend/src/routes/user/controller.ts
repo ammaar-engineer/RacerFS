@@ -2,91 +2,41 @@ import { Body, Controller, Post } from "@nestjs/common";
 import { InjectRepository } from "@nestjs/typeorm";
 import { Token, User } from "src/entity";
 import { SuccessResponse } from "src/utilities/Success.Response";
-import { UserRegisterDTO, VerifyOtpDTO, UserLoginDTO } from "./dto";
 import { Repository } from "typeorm";
-import { UserService } from "./service";
-import { JwtService } from "src/global_services/jwt.module";
-import { UserValidationService } from "./validation";
-import { NotFoundException } from "src/CustomExceptionHandle";
+import { UserLoginDTO, UserRegisterDTO, VerifyOtpDTO } from "./raw";
+import { UserBridgeModules } from "./bridge/main.bridge";
+import { SessionBridgeModules } from "./bridge/session.bridge";
+import { UserDbModules } from "./db";
 
 @Controller("user")
 export class UserController {
     constructor(
         @InjectRepository(User) private readonly userRepo: Repository<User>,
-        private readonly jwtService: JwtService,
-        private readonly userService: UserService,
-        private readonly validationService: UserValidationService,
+        private readonly bridgeUser: UserBridgeModules,
+        private readonly sessionBridge: SessionBridgeModules,
         @InjectRepository(Token) private readonly tokenRepo: Repository<Token>
     ) {}
 
     @Post('register')
     async UserRegister(@Body() body: UserRegisterDTO) {
         const {email} = body
-        // Validasi email belum terdaftar
-        await this.validationService.validateEmailNotExists(email);
-        // Generate OTP dan simpan ke Redis
-        const { sessionId, otp } = await this.userService.generateOtp(email, 'register')
-        // Debug
-        console.log("ISI EMAIL= ", email, otp, sessionId) 
-        // Kirim OTP ke email
-        await this.userService.sendOtpCodeToEmail(email, otp, 'register')
+        const {sessionId} = await this.sessionBridge.createRegisterSession(email)
         return SuccessResponse("OTP Has been sent to your email", { sessionId })
     }
 
     @Post('login')
     async UserLogin(@Body() body: UserLoginDTO) {
         const {email} = body
-        await this.validationService.validateEmailExists(email);
-        // Generate OTP dan simpan ke Redis
-        const { sessionId, otp } = await this.userService.generateOtp(email, 'login')
-        // Buat debug
-        console.log("ISI EMAIL= ", email, otp, sessionId) 
-        // Kirim OTP ke email
-        await this.userService.sendOtpCodeToEmail(email, otp, 'login')
+        const {sessionId} = await this.sessionBridge.createLoginSession(email)
         return SuccessResponse("OTP Has been sent to your email", { sessionId })
     }
 
     @Post("verify-otp")
     async VerifyOtp(@Body() body: VerifyOtpDTO) {
-        const { sessionId, otp } = body;
-        // Validasi OTP menggunakan service
-        const { email, action } = await this.userService.findClientOtp(sessionId, otp);
-        // If login
-        if (action === 'login') {
-            const findEmail = await this.userRepo.findOne({
-                where: {
-                    email: email
-                }
-            })
-            if (!findEmail) {
-                throw new NotFoundException("Email not found")
-            }
-            return SuccessResponse("Login successful", { 
-                email,
-                userId: this.jwtService.generateJwt({user_id: findEmail?.id})
-            });
-        }
-        // Register
-        // Insert user
-        const newUser = this.userRepo.create({ email });
-        const {id} = await this.userRepo.save(newUser);
-        // Insert file access token for first user
-        const createPrivateToken = this.tokenRepo.create({
-            token: this.jwtService.generateJwt({
-                type: "file_access_token"
-            }),
-            user_id: id,
-            type: "file_access_token"
-        })
-        await this.tokenRepo.save(createPrivateToken)
-        // Create auth token
-        const jwtToken = this.jwtService.generateJwt({
-            user_id: id,
-            type: "account_token"
-        })
-        return SuccessResponse("OTP verified successfully and user created", { 
-            token: jwtToken
-        });
+        const { sessionId, otp: rawOtp } = body;
+        const {email, action} = await this.sessionBridge.verifyOtp(rawOtp, sessionId)
+        const {token} = await this.bridgeUser.OtpAction(action, email)
+        return SuccessResponse(`${action} successfully`, {token})
     }
 
 }
