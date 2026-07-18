@@ -1,5 +1,5 @@
 import { Injectable } from "@nestjs/common";
-import { IsString, IsNotEmpty, IsIn, IsObject, ValidationError } from "class-validator";
+import { IsString, IsNotEmpty, IsIn, IsObject, ValidationError, IsNumber } from "class-validator";
 import { plainToInstance } from "class-transformer";
 import { validateOrReject } from "class-validator";
 import { NotFoundException } from "src/CustomExceptionHandle";
@@ -22,15 +22,12 @@ export class WebSocketMessageDto {
  */
 export class UploadingEventDataDto {
     @IsString()
-    @IsNotEmpty({ message: "fileName is required" })
-    fileName!: string;
+    @IsNotEmpty({ message: "file-name is required" })
+    "file-name"!: string;
 
-    // Custom validation untuk trim check
-    validate() {
-        if (this.fileName.trim() === '') {
-            throw new NotFoundException("fileName cannot be empty or whitespace only");
-        }
-    }
+    @IsNumber()
+    @IsNotEmpty({message: "file-size is required"})
+    "file-size"!: number
 }
 
 /**

@@ -4,6 +4,27 @@ import { Repository } from "typeorm";
 import { User } from "src/entity";
 import { ConflictException, NotFoundException } from "src/CustomExceptionHandle";
 import { TypeOrmModule } from "@nestjs/typeorm";
+import { IsEmail, IsString } from "class-validator";
+
+export class UserRegisterDTO {
+    @IsString()
+    // @IsEmail() for test
+    email!: string;
+}
+
+export class VerifyOtpDTO {
+    @IsString()
+    sessionId!: string;
+    
+    @IsString()
+    otp!: string;
+}
+
+export class UserLoginDTO {
+    @IsEmail()
+    email!: string;
+}
+
 
 @Injectable()
 export class UserValidationService {

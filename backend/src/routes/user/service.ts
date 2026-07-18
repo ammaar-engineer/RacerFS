@@ -14,13 +14,21 @@ export class UserService {
         @Inject(RESEND_CLIENT) private readonly emailService: Resend
     ) {}
 
+    async IsEmailExist() {
+        
+    }
+
+    async registerEmailService() {
+
+    }
+
     async generateOtp(email: string, action: 'register' | 'login'): Promise<{ sessionId: string; otp: string }> {
         const sessionId = crypto.randomUUID();
         const otp = await otpGen();
         
         // Simpan ke Redis dengan expire 5 menit (300 detik)
         await this.redisService.set(
-            sessionId, 
+            `${sessionId}:auth`, 
             JSON.stringify({ email, otp, action }), 
             { EX: 300 }
         );
