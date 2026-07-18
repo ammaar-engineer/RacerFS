@@ -1,9 +1,6 @@
 import { Logger, UseFilters } from "@nestjs/common";
 import { MessageBody, OnGatewayConnection, OnGatewayDisconnect, OnGatewayInit, SubscribeMessage, WebSocketGateway, WebSocketServer } from "@nestjs/websockets";
 import { Server } from "socket.io";
-import { WebSocketMessageType } from "src/types/Websocket_upload_event";
-import { FileRouteService } from "./service";
-import { static_output_types } from "src/types/static_output_types";
 import { WebSocketException } from "src/GlobalException";
 import { WebSocketValidation } from "./web_socket_validation";
 import { FileRouteWebSocketServices } from "./web_socket_services";

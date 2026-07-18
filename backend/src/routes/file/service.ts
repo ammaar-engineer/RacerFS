@@ -60,7 +60,7 @@ export class FileRouteService {
         // Insert to MinIO
         try {
             await this.minioService.putObject(
-                'racerfs_bucket',
+                'racerfs-bucket',
                 fileName,
                 passThroughStream,
                 fileSize,

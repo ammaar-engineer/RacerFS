@@ -38,7 +38,7 @@ export class UploadingEventDataDto {
  * TODO: Add validation rules when requirements are defined
  */
 export class SuccessEventDataDto {
-    // Placeholder for future validation
+    
 }
 
 /**
