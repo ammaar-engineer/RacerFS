@@ -1,1 +1,4 @@
-export type WebSocketUploadEvent = "UPLOADING" | "SUCCESS" | "FAILED"
+export type WebSocketMessageType = {
+    event: "UPLOADING" | "SUCCESS" | "FAILED"
+    data: any
+}

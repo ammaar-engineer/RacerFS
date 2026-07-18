@@ -4,6 +4,7 @@ import { ConfigService } from "@nestjs/config";
 import { BaseException } from './CustomExceptionHandle'
 import { Response } from 'express'
 import { static_output_types } from "./types/static_output_types";
+import { BaseWsExceptionFilter } from "@nestjs/websockets";
 
 @Catch()
 export class CustomGlobalException extends BaseExceptionFilter {
@@ -23,13 +24,6 @@ export class CustomGlobalException extends BaseExceptionFilter {
       data: null,
       message: "Internal server error"
     }
-    console.log(this.configService.get("REDIS_URL"))
-    console.log({
-      "Kondisi env NODE_ENV": {
-        isDevelopment: this.configService.get<string>('NODE_ENV') === 'development',
-        NODE_ENV: this.configService.get<string>('NODE_ENV')
-      }
-    })
     console.error('=== Exception Details ===')
     console.error('Type:', exception?.constructor?.name)
     console.error('Message:', exception?.message)
@@ -63,6 +57,69 @@ export class CustomGlobalException extends BaseExceptionFilter {
     }
 
     response.status(ServerOutput['statusCode'] as number).json(ServerOutput)
+  }
+
+  private getErrorCodeFromStatus(status: number): string {
+    const errorCodeMap: Record<number, string> = {
+      400: 'BAD_REQUEST',
+      401: 'UNAUTHORIZED',
+      403: 'FORBIDDEN',
+      404: 'NOT_FOUND',
+      409: 'CONFLICT',
+      422: 'UNPROCESSABLE_ENTITY',
+      500: 'INTERNAL_SERVER_ERROR',
+      502: 'BAD_GATEWAY',
+      503: 'SERVICE_UNAVAILABLE',
+    }
+    
+    return errorCodeMap[status] || 'HTTP_ERROR'
+  }
+}
+
+@Catch()
+export class WebSocketException extends BaseWsExceptionFilter {
+  catch(exception: any, host: ArgumentsHost): void {
+    const client = host.switchToWs().getClient()
+    
+    console.error('=== WebSocket Exception Details ===')
+    console.error('Type:', exception?.constructor?.name)
+    console.error('Message:', exception?.message)
+    console.error('Stack:', exception?.stack)
+    console.error('===================================')
+    
+    let error: static_output_types = {
+      statusCode: 500,
+      errorCode: "INTERNAL_SERVER_ERROR",
+      success: false,
+      data: null,
+      message: exception?.message || "Internal server error"
+    }
+
+    if (exception instanceof BaseException) {
+      error.errorCode = exception.errorCode
+      error.data = exception.data
+      error.success = exception.success
+      error.statusCode = exception.statusCode
+      error.message = exception.message
+    } else if (exception instanceof HttpException) {
+      const status = exception.getStatus()
+      const exceptionResponse = exception.getResponse()
+      
+      error.statusCode = status
+      error.success = false
+      
+      if (typeof exceptionResponse === 'object' && exceptionResponse !== null) {
+        const responseObj = exceptionResponse as any
+        error.message = responseObj.message || exception.message
+        error.errorCode = responseObj.error || this.getErrorCodeFromStatus(status)
+        error.data = responseObj.data || null
+      } else {
+        error.message = exception.message
+        error.errorCode = this.getErrorCodeFromStatus(status)
+      }
+    }
+
+    client.emit('error', error)
   }
 
   private getErrorCodeFromStatus(status: number): string {

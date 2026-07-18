@@ -1,40 +1,27 @@
 import { Controller, Get, Headers, Param, Patch, Post, Query, Req, Res } from "@nestjs/common";
-import { plainToInstance } from "class-transformer";
-import { FileListHeaderDTO, FileUploadHeadersDTO, FileUploadQueryDTO, FileEditHeaderDTO, FileEditQueryDTO } from "./dto";
-import { validateOrReject } from "class-validator";
 import { FileRouteService } from "./service";
 import type { Request, Response } from "express";
 import { SuccessResponse } from "src/utilities/Success.Response";
-import { JwtService } from "src/global_services/jwt.module";
-import { FileRouteValidations } from "./validation";
-import { InjectRepository } from "@nestjs/typeorm";
-import { Token } from "src/entity";
-import { Repository } from "typeorm";
+import { HttpValidation } from "./http_validation";
 
 @Controller("file")
 export class FileRouteController {
     constructor(
         private readonly fileServices: FileRouteService,
-        private readonly jwtService: JwtService,
-        private readonly fileRouteValidation: FileRouteValidations,
-        @InjectRepository(Token) private readonly tokenRepo: Repository<Token>,
+        private readonly httpValidation: HttpValidation
     ) {}
     @Get("list")
     async getFileList(
         @Headers() headers: Record<string, string>,
     ) {
-        // Validate headers
-        const { accountTokenData, accessTokenData, accessTokenOwner } = await this.fileRouteValidation.validateDualTokenHeaders(
-            headers,
-            FileListHeaderDTO,
-            {validateOwner: true}
-        )
+        // Validate request
+        const { userId, accessTokenOwnerId } = await this.httpValidation.validateFileListRequest(headers);
 
         // Service
-        const fileList = await this.fileServices.getUserFileList(accountTokenData.value.user_id, accessTokenOwner.user_id)
+        const fileList = await this.fileServices.getUserFileList(userId, accessTokenOwnerId);
         
         // Return
-        return SuccessResponse("File list retrieved successfully", fileList)
+        return SuccessResponse("File list retrieved successfully", fileList);
     }
 
     @Get("download")
@@ -51,18 +38,14 @@ export class FileRouteController {
         @Headers() headers: Record<string, string>,
         @Query() query: Record<string, string>,
     ) {
-        // Validate headers and validate token
-        const { accessTokenData, accountTokenData } = await this.fileRouteValidation.validateDualTokenHeaders(
-            headers,
-            FileEditHeaderDTO,
-            { validateOwner: true }
-        )
-        // Query validation
-        const queryDto = (await this.fileRouteValidation.customDtoValidation(FileEditQueryDTO, query))
+        // Validate request
+        const { fileKey, newName } = await this.httpValidation.validateFileRenameRequest(headers, query);
+
         // Service
-        const editFile = await this.fileServices.renameFile(queryDto.fileKey, queryDto["new-name"])
+        const editFile = await this.fileServices.renameFile(fileKey, newName);
+
         // Return
-        return SuccessResponse(`File with ID ${editFile.oldName} has been renamed`)
+        return SuccessResponse(`File ${editFile.oldName} has been renamed`);
     }
 
     // @Post("upload")

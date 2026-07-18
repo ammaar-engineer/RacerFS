@@ -7,23 +7,18 @@ import { MINIO_CLIENT, type MinIOModuleType } from "src/global_modules/minio.mod
 import { PassThrough } from "stream";
 import { Repository } from "typeorm";
 import { FileRouteValidations } from "./validation";
+import { WebSocketValidation } from "./web_socket_validation";
 
 @Injectable()
 export class FileRouteService {
     constructor(
         @Inject(MINIO_CLIENT) private readonly minioService: MinIOModuleType,
         @InjectRepository(File) private readonly fileRepo: Repository<File>,
-        private readonly fileRouteValidation: FileRouteValidations
+        private readonly fileRouteValidation: FileRouteValidations,
+        private readonly wsValidation: WebSocketValidation
     ) {}
-    async WsEvent_UPLOADING() {
+    
 
-    }
-    async WsEvent_SUCCESS() {
-
-    }
-    async WsEvent_FAILED() {
-        
-    }
     async renameFile(fileKey: string, newName: string) {
         const fileExist = await this.fileRepo.findOne({
             where: {
