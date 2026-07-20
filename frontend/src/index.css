@@ -1,0 +1,292 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --background: 0 0% 100%;
+    --foreground: 0 0% 14%;
+    --card: 0 0% 100%;
+    --card-foreground: 0 0% 14%;
+    --popover: 0 0% 100%;
+    --popover-foreground: 0 0% 14%;
+    --primary: 0 0% 14%;
+    --primary-foreground: 0 0% 98%;
+    --secondary: 40 14% 96%;
+    --secondary-foreground: 0 0% 14%;
+    --muted: 40 14% 96%;
+    --muted-foreground: 30 5% 38%;
+    --accent: 43 100% 83%;
+    --accent-foreground: 0 0% 14%;
+    --destructive: 0 84.2% 60.2%;
+    --destructive-foreground: 0 0% 98%;
+    --border: 30 6% 88%;
+    --input: 30 6% 88%;
+    --ring: 0 0% 14%;
+    --radius: 1rem;
+
+    /* RacerFS scene tokens (day) */
+    --sky-top: #a8dcff;
+    --sky-mid: #d8f0ff;
+    --sky-low: #eef9ff;
+    --river: #9ed9f2;
+    --river-deep: #7cc6e8;
+    --far-hill: #c9e7c2;
+    --near-hill: #b2dba8;
+    --ground: #cdeeb6;
+    --scene-line: #232323;
+    --paper: #fffdf7;
+    --petal: #ffd9e2;
+  }
+
+  .night {
+    --background: 228 32% 10%;
+    --foreground: 40 30% 92%;
+    --card: 228 26% 14%;
+    --card-foreground: 40 30% 92%;
+    --popover: 228 26% 14%;
+    --popover-foreground: 40 30% 92%;
+    --primary: 40 30% 92%;
+    --primary-foreground: 228 32% 10%;
+    --secondary: 228 20% 20%;
+    --secondary-foreground: 40 30% 92%;
+    --muted: 228 20% 20%;
+    --muted-foreground: 228 12% 65%;
+    --accent: 43 60% 55%;
+    --accent-foreground: 228 32% 10%;
+    --border: 228 18% 26%;
+    --input: 228 18% 26%;
+    --ring: 40 30% 92%;
+
+    --sky-top: #141c38;
+    --sky-mid: #1d2a4d;
+    --sky-low: #2b3c66;
+    --river: #22345c;
+    --river-deep: #1a2949;
+    --far-hill: #22355a;
+    --near-hill: #1d2f52;
+    --ground: #243a5e;
+    --scene-line: #0d1326;
+    --paper: #1c2542;
+    --petal: #e8a7b8;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+  html {
+    scroll-behavior: smooth;
+  }
+  body {
+    @apply bg-background text-foreground;
+    font-family: 'Inter', system-ui, sans-serif;
+    -webkit-font-smoothing: antialiased;
+    overflow-x: hidden;
+  }
+  .font-pixel {
+    font-family: 'Pixelify Sans', 'Silkscreen', monospace;
+  }
+  .font-silk {
+    font-family: 'Silkscreen', monospace;
+  }
+}
+
+/* ---------- pixel rendering ---------- */
+.pixel {
+  image-rendering: pixelated;
+  shape-rendering: crispEdges;
+}
+
+/* ---------- keyframes ---------- */
+@keyframes drift {
+  from { transform: translateX(-15vw); }
+  to { transform: translateX(115vw); }
+}
+@keyframes drift-slow {
+  from { transform: translateX(-20vw); }
+  to { transform: translateX(120vw); }
+}
+@keyframes floaty {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-8px); }
+}
+@keyframes floaty-sm {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-4px); }
+}
+@keyframes sway {
+  0%, 100% { transform: rotate(-4deg); }
+  50% { transform: rotate(4deg); }
+}
+@keyframes sway-sm {
+  0%, 100% { transform: rotate(-2deg); }
+  50% { transform: rotate(2.5deg); }
+}
+@keyframes spin-slow {
+  to { transform: rotate(360deg); }
+}
+@keyframes spin-left {
+  to { transform: rotate(-360deg); }
+}
+@keyframes ripple {
+  0% { transform: scale(0.4); opacity: 0.8; }
+  100% { transform: scale(1.6); opacity: 0; }
+}
+@keyframes blink-eyes {
+  0%, 91%, 100% { transform: scaleY(1); }
+  94%, 97% { transform: scaleY(0.08); }
+}
+@keyframes tail-wag {
+  0%, 100% { transform: rotate(-7deg); }
+  50% { transform: rotate(9deg); }
+}
+@keyframes ear-twitch {
+  0%, 88%, 100% { transform: rotate(0deg); }
+  92% { transform: rotate(-9deg); }
+  96% { transform: rotate(5deg); }
+}
+@keyframes breathe {
+  0%, 100% { transform: scaleY(1); }
+  50% { transform: scaleY(1.045); }
+}
+@keyframes walk-bob {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-3px); }
+}
+@keyframes petal-fall {
+  0% { transform: translate(0, -5vh) rotate(0deg); opacity: 0; }
+  8% { opacity: 1; }
+  92% { opacity: 1; }
+  100% { transform: translate(9vw, 104vh) rotate(340deg); opacity: 0; }
+}
+@keyframes butterfly-flutter {
+  0%, 100% { transform: translate(0, 0) rotate(-6deg); }
+  25% { transform: translate(14px, -18px) rotate(5deg); }
+  50% { transform: translate(-6px, -30px) rotate(-4deg); }
+  75% { transform: translate(-18px, -12px) rotate(6deg); }
+}
+@keyframes wing-flap {
+  0%, 100% { transform: scaleX(1); }
+  50% { transform: scaleX(0.35); }
+}
+@keyframes bird-fly {
+  from { transform: translateX(-10vw) translateY(0); }
+  50% { transform: translateX(45vw) translateY(-3vh); }
+  to { transform: translateX(110vw) translateY(0); }
+}
+@keyframes sparkle-pop {
+  0% { transform: scale(0) rotate(0deg); opacity: 1; }
+  70% { transform: scale(1) rotate(90deg); opacity: 1; }
+  100% { transform: scale(0.2) rotate(180deg); opacity: 0; }
+}
+@keyframes paw-fade {
+  0% { transform: scale(0.5) rotate(var(--paw-rot, 0deg)); opacity: 0.9; }
+  100% { transform: scale(1.15) rotate(var(--paw-rot, 0deg)); opacity: 0; }
+}
+@keyframes bar-grow {
+  from { transform: scaleX(0); }
+  to { transform: scaleX(1); }
+}
+@keyframes dash-flow {
+  to { stroke-dashoffset: -24; }
+}
+@keyframes train-chug {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-3px); }
+}
+@keyframes rail-move {
+  to { background-position-x: 17px; }
+}
+@keyframes rail-shine {
+  to { background-position-x: 40px; }
+}
+@keyframes smoke-puff {
+  0% { transform: translate(0, 0) scale(0.5); opacity: 0.9; }
+  100% { transform: translate(-14px, -26px) scale(1.4); opacity: 0; }
+}
+@keyframes zzz {
+  0% { transform: translate(0, 0) scale(0.6); opacity: 0; }
+  20% { opacity: 1; }
+  100% { transform: translate(14px, -26px) scale(1.1); opacity: 0; }
+}
+@keyframes cursor-look {
+  0%, 100% { transform: translate(0, 0); }
+}
+@keyframes typing-dot {
+  0%, 60%, 100% { transform: translateY(0); }
+  30% { transform: translateY(-4px); }
+}
+@keyframes twinkle {
+  0%, 100% { opacity: 0.25; }
+  50% { opacity: 1; }
+}
+@keyframes caret-blink {
+  0%, 49% { opacity: 1; }
+  50%, 100% { opacity: 0; }
+}
+@keyframes leaf-drift {
+  0% { transform: translateX(0) translateY(0) rotate(0deg); }
+  100% { transform: translateX(24vw) translateY(2vh) rotate(200deg); }
+}
+
+/* ---------- helper classes ---------- */
+.anim-floaty { animation: floaty 5s ease-in-out infinite; }
+.anim-floaty-sm { animation: floaty-sm 4s ease-in-out infinite; }
+.anim-sway { animation: sway 6s ease-in-out infinite; transform-origin: bottom center; }
+.anim-sway-sm { animation: sway-sm 5s ease-in-out infinite; transform-origin: bottom center; }
+.anim-breathe { animation: breathe 3.4s ease-in-out infinite; transform-origin: bottom center; }
+.anim-blink { animation: blink-eyes 5.2s ease-in-out infinite; transform-origin: center; }
+.anim-tail { animation: tail-wag 2.6s ease-in-out infinite; transform-origin: left bottom; }
+.anim-ear { animation: ear-twitch 7s ease-in-out infinite; transform-origin: bottom center; }
+.anim-bob { animation: walk-bob 0.5s ease-in-out infinite; }
+.anim-chug { animation: train-chug 1.8s ease-in-out infinite; }
+.anim-rail { animation: rail-move 0.55s linear infinite; }
+.anim-rail-shine { animation: rail-shine 0.8s linear infinite; }
+.anim-twinkle { animation: twinkle 3s ease-in-out infinite; }
+.anim-caret { animation: caret-blink 1s step-end infinite; }
+
+/* ---------- paper texture ---------- */
+.paper-tex {
+  background-image:
+    radial-gradient(circle at 20% 30%, rgba(35, 35, 35, 0.025) 0 1px, transparent 1px),
+    radial-gradient(circle at 70% 60%, rgba(35, 35, 35, 0.02) 0 1px, transparent 1px),
+    radial-gradient(circle at 45% 85%, rgba(155, 118, 83, 0.03) 0 1px, transparent 1px);
+  background-size: 13px 13px, 17px 17px, 23px 23px;
+}
+
+/* ---------- dithered edges ---------- */
+.dither-fade {
+  -webkit-mask-image: linear-gradient(to bottom, black 55%, transparent 100%);
+  mask-image: linear-gradient(to bottom, black 55%, transparent 100%);
+}
+
+/* ---------- scrollbar ---------- */
+::-webkit-scrollbar { width: 10px; height: 10px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb {
+  background: color-mix(in srgb, var(--scene-line) 18%, transparent);
+  border-radius: 999px;
+  border: 2px solid transparent;
+  background-clip: content-box;
+}
+
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+.no-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+
+/* ---------- reduced motion ---------- */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.001s !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001s !important;
+    scroll-behavior: auto !important;
+  }
+}
