@@ -1,6 +1,6 @@
 import { Injectable } from "@nestjs/common";
-import { UserDbModules } from "../db";
-import { JwtService } from "src/global_services/jwt.module";
+import { UserDbModules } from "../db.main";
+import { JwtService } from "src/global_bridge/jwt.module";
 
 @Injectable()
 export class UserBridgeModules {

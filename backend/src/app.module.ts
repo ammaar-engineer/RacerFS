@@ -5,6 +5,8 @@ import { EmailSendModule } from './global_modules/resend.module';
 import { MinIOModule } from './global_modules/minio.module';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { UserRoutesModule } from './routes/user/module';
+import { FileRouteModule } from './routes/file/module';
+import { PermissionBridgeModule } from './global_bridge/permission.bridge';
 
 @Module({
   imports: [
@@ -15,7 +17,9 @@ import { UserRoutesModule } from './routes/user/module';
     RedisClientModule,
     EmailSendModule,
     MinIOModule,
-    UserRoutesModule
+    PermissionBridgeModule,
+    UserRoutesModule,
+    FileRouteModule
   ],
   controllers: [],
   providers: [],

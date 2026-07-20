@@ -13,28 +13,6 @@ export enum TokenType {
   "account_token"="account_token"
 }
 
-@Entity('Token')
-export class Token {
-  @PrimaryGeneratedColumn()
-  id!: string;
-
-  @Column()
-  token!: string;
-
-  @Column({ type: 'int', name: 'user_id' })
-  user_id!: number;
-
-  @Column({
-    type: 'enum',
-    enum: TokenType,
-  })
-  type!: string;
-
-  @ManyToOne(() => User, (user) => user.tokens, { onDelete: 'CASCADE' })
-  @JoinColumn({ name: 'user_id' })
-  user!: User;
-}
-
 @Entity("User")
 export class User {
   @PrimaryGeneratedColumn()
@@ -55,6 +33,28 @@ export class User {
 
   @OneToMany(() => File, (file) => file.user, { cascade: true })
   files!: File[];
+}
+
+@Entity('Token')
+export class Token {
+  @PrimaryGeneratedColumn()
+  id!: string;
+
+  @Column()
+  token!: string;
+
+  @Column({ type: 'int', name: 'user_id' })
+  user_id!: number;
+
+  @Column({
+    type: 'enum',
+    enum: TokenType,
+  })
+  type!: string;
+
+  @ManyToOne(() => User, (user) => user.tokens, { onDelete: 'CASCADE' })
+  @JoinColumn({ name: 'user_id' })
+  user!: User;
 }
 
 @Entity("Snippet")

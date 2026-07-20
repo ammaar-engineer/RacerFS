@@ -2,10 +2,10 @@ import {Module} from '@nestjs/common'
 import { UserController } from './controller'
 import { TypeOrmModule } from '@nestjs/typeorm'
 import { User } from 'src/entity'
-import { JwtModule } from 'src/global_services/jwt.module'
-import { UserDbModules } from './db'
-import { UserBridgeModules } from './bridge/main.bridge'
-import { SessionBridgeModules } from './bridge/session.bridge'
+import { JwtModule } from 'src/global_bridge/jwt.module'
+import { UserDbModules } from './db.main'
+import { UserBridgeModules } from './bridge/bridge.main'
+import { SessionBridgeModules } from './bridge/bridge.session'
 
 @Module({
     imports: [

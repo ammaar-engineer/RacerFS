@@ -1,7 +1,6 @@
 import { Inject, Injectable } from "@nestjs/common"
 import * as Minio from "minio"
 import { MINIO_CLIENT } from "src/global_modules/minio.module"
-import crypto from 'crypto'
 
 @Injectable()
 export class FileDbinioModules {

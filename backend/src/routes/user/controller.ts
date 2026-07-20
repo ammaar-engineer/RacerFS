@@ -3,18 +3,16 @@ import { InjectRepository } from "@nestjs/typeorm";
 import { Token, User } from "src/entity";
 import { SuccessResponse } from "src/utilities/Success.Response";
 import { Repository } from "typeorm";
-import { UserLoginDTO, UserRegisterDTO, VerifyOtpDTO } from "./raw";
-import { UserBridgeModules } from "./bridge/main.bridge";
-import { SessionBridgeModules } from "./bridge/session.bridge";
-import { UserDbModules } from "./db";
+import { UserLoginDTO, UserRegisterDTO, VerifyOtpDTO } from "./raw.main";
+import { UserBridgeModules } from "./bridge/bridge.main";
+import { SessionBridgeModules } from "./bridge/bridge.session";
+import { UserDbModules } from "./db.main";
 
 @Controller("user")
 export class UserController {
     constructor(
-        @InjectRepository(User) private readonly userRepo: Repository<User>,
         private readonly bridgeUser: UserBridgeModules,
         private readonly sessionBridge: SessionBridgeModules,
-        @InjectRepository(Token) private readonly tokenRepo: Repository<Token>
     ) {}
 
     @Post('register')

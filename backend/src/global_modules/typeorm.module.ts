@@ -1,6 +1,6 @@
 import {Global, Module} from '@nestjs/common'
 import {TypeOrmModule} from '@nestjs/typeorm'
-import { File, Snippet, User } from 'src/entity'
+import { File, Snippet, Token, User } from 'src/entity'
 
 
 @Global()
@@ -11,7 +11,7 @@ import { File, Snippet, User } from 'src/entity'
             host: 'localhost',
             port: 5432,
             synchronize: true,
-            entities: [User, File, Snippet],
+            entities: [User, File, Snippet, Token],
             username: 'racerfs',
             password: 'racerfs123',
             database: 'racerfs_db',

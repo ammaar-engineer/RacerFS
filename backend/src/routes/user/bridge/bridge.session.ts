@@ -4,7 +4,7 @@ import { NotFoundException, UnauthorizedException } from "src/CustomExceptionHan
 import { REDIS_CLIENT } from "src/global_modules/redis.module";
 import crypto from 'crypto'
 import { otpGen } from "otp-gen-agent";
-import { UserDbModules } from "../db";
+import { UserDbModules } from "../db.main";
 
 @Injectable()
 export class SessionBridgeModules {

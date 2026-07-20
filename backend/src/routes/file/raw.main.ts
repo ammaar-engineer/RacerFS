@@ -1,6 +1,6 @@
 import { Injectable } from "@nestjs/common"
 import { plainToInstance } from "class-transformer"
-import { IsIn, IsNotEmpty, IsNumberString, IsString, validateOrReject } from "class-validator"
+import { IsBoolean, IsIn, IsNotEmpty, IsNumberString, IsString, validateOrReject } from "class-validator"
 
 export class FileListHeaderDTO {
     @IsString()
@@ -42,7 +42,7 @@ export class FileDownloadHeaderDTO {
 export class FileDownloadQueryDTO {
     @IsString()
     @IsNotEmpty()
-    "file-key"!: string
+    "file-name"!: string
 }
 
 export class FileGetPresignedUploadQueryDTO {
@@ -58,6 +58,10 @@ export class FileGetPresignedUploadHeaderDTO {
     @IsNumberString()
     @IsNotEmpty()
     "file-size"!: string
+
+    @IsString()
+    @IsNotEmpty()
+    "file-key"!: string
 }
 
 export class FileConfirmUploadHeaderDTO {
@@ -68,10 +72,6 @@ export class FileConfirmUploadHeaderDTO {
     @IsNumberString()
     @IsNotEmpty()
     "file-size"!: string
-
-    @IsString()
-    @IsNotEmpty()
-    "file-key"!: string
 }
 export class FileConfirmUploadQueryDTO {
     @IsString()
@@ -82,6 +82,50 @@ export class FileConfirmUploadQueryDTO {
     @IsString()
     @IsNotEmpty()
     "file-name"!: string
+}
+
+export class FileDeleteHeadersDTO {
+    @IsString()
+    @IsNotEmpty()
+    "authorization"!: string   
+}
+export class FileDeleteQueryDTO {
+    @IsString()
+    @IsNotEmpty()
+    "file-name"!: string
+}
+
+export class FileGenerateAccessTokenHeaderDTO {
+    @IsString()
+    @IsNotEmpty()
+    "authorization"!: string
+}
+
+export class FileDeleteAccessTokenHeaderDTO {
+    @IsString()
+    @IsNotEmpty()
+    "authorization"!: string
+}
+export class FileDeleteAccessTokenQueryDTO {
+    @IsString()
+    @IsNotEmpty()
+    "token"!: string
+}
+
+export class FileSetVisibilityHeaderDTO {
+    @IsString()
+    @IsNotEmpty()
+    "authorization"!: string
+}
+export class FileSetVisibilityQueryDTO {
+    @IsString()
+    @IsNotEmpty()
+    "file-name"!: string
+}
+export class FileSetVisibilityBodyDTO {
+    @IsBoolean()
+    @IsNotEmpty()
+    "is_public"!: boolean
 }
 
 
