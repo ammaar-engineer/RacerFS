@@ -18,3 +18,8 @@ Keunikan RacerFS ada dimana dia tinggal. RacerFS akan menjadi SaaS full berbasis
 2. Tidak mungkin menggunakan web browser ketika linux belum memiliki DE dan masih dalam terminal kosong
 Maka dari itu saya ingin menjadikan nya SaaS full berbasis terminal dengan TUI
 ****
+# Struktur Repositori
+Repositori ini terdiri dari tiga komponen utama:
+*   [backend](backend/): REST API dan sistem server backend utama.
+*   [tui](tui/): Aplikasi Terminal User Interface (TUI) utama yang berjalan langsung di terminal Anda.
+*   [frontend](frontend/): Landing page website interaktif RacerFS (React + TypeScript + Vite).
