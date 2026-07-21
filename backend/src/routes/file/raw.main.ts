@@ -58,10 +58,6 @@ export class FileGetPresignedUploadHeaderDTO {
     @IsNumberString()
     @IsNotEmpty()
     "file-size"!: string
-
-    @IsString()
-    @IsNotEmpty()
-    "file-key"!: string
 }
 
 export class FileConfirmUploadHeaderDTO {
@@ -72,6 +68,10 @@ export class FileConfirmUploadHeaderDTO {
     @IsNumberString()
     @IsNotEmpty()
     "file-size"!: string
+
+    @IsString()
+    @IsNotEmpty()
+    "file-key"!: string
 }
 export class FileConfirmUploadQueryDTO {
     @IsString()
@@ -131,11 +131,11 @@ export class FileSetVisibilityBodyDTO {
 
 @Injectable()
 export class FileRawModules {
-    async validateSourceDTO<T>(dto: new () => T, source: any) {
+    async validateSourceDTO<T>(dto: new () => T, source: any): Promise<T> {
         const dtoClass = plainToInstance(dto, source, {
             excludeExtraneousValues: false
         })
-        await validateOrReject(dto)
-        return dtoClass
+        await validateOrReject(dtoClass as () => T)
+        return dtoClass as T
     }
 }

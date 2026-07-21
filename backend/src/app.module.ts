@@ -3,9 +3,10 @@ import { AppTypeOrmModule } from './global_modules/typeorm.module';
 import { RedisClientModule } from './global_modules/redis.module';
 import { EmailSendModule } from './global_modules/resend.module';
 import { MinIOModule } from './global_modules/minio.module';
-import { ConfigModule, ConfigService } from '@nestjs/config';
+import { ConfigModule } from '@nestjs/config';
 import { UserRoutesModule } from './routes/user/module';
 import { FileRouteModule } from './routes/file/module';
+import { SnippetRouteModule } from './routes/snippet/module';
 import { PermissionBridgeModule } from './global_bridge/permission.bridge';
 
 @Module({
@@ -19,7 +20,8 @@ import { PermissionBridgeModule } from './global_bridge/permission.bridge';
     MinIOModule,
     PermissionBridgeModule,
     UserRoutesModule,
-    FileRouteModule
+    FileRouteModule,
+    SnippetRouteModule
   ],
   controllers: [],
   providers: [],

@@ -2,7 +2,6 @@ import { forwardRef, Inject, Injectable } from "@nestjs/common";
 import { createClient } from "redis";
 import { BadRequestException, NotFoundException, UnauthorizedException } from "src/CustomExceptionHandle";
 import { JwtService } from "src/global_bridge/jwt.module";
-import { PermissionBridge } from "src/global_bridge/permission.bridge";
 import { REDIS_CLIENT } from "src/global_modules/redis.module";
 import { FileDbModules } from "./db/db.main";
 import { FileDbinioModules } from "./db/db.minio";

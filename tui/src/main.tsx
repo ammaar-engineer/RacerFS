@@ -1,395 +1,225 @@
-import { render, Text, Box, useInput } from "ink"
-import { useState, useEffect } from "react"
+import blessed from 'blessed'
 
-// Mock Backend API
-const mockBackendAPI = {
-    login: async (email: string) => {
-        await new Promise(resolve => setTimeout(resolve, 1000))
-        return {
-            success: true,
-            message: "OTP berhasil dikirim ke email Anda"
-        }
+const screen = blessed.screen({
+    smartCSR: true,
+    title: "Login - RacerFS TUI"
+})
+
+// Background box for aesthetics
+const background = blessed.box({
+    parent: screen,
+    top: 'center',
+    left: 'center',
+    width: 70,
+    height: 20,
+    style: {
+        bg: 'black'
+    }
+})
+
+// Login form container
+const form = blessed.form({
+    parent: background,
+    keys: true,
+    left: 'center',
+    top: 'center',
+    width: 66,
+    height: 18,
+    border: {
+        type: 'line'
     },
-    register: async (email: string, name: string) => {
-        await new Promise(resolve => setTimeout(resolve, 1000))
-        return {
-            success: true,
-            message: "OTP berhasil dikirim ke email Anda untuk verifikasi"
-        }
+    style: {
+        border: {
+            fg: '#00d9ff'
+        },
+        bg: 'black'
     },
-    verifyOTP: async (email: string, otp: string) => {
-        await new Promise(resolve => setTimeout(resolve, 800))
-        if (otp === "123456") {
-            return {
-                success: true,
-                message: "Login berhasil!",
-                token: "mock-jwt-token-123"
-            }
-        }
-        return {
-            success: false,
-            message: "Kode OTP salah atau sudah kadaluarsa"
+    label: ' RacerFS Login '
+})
+
+// Title with decorative separator
+blessed.text({
+    parent: form,
+    top: 1,
+    left: 'center',
+    content: '╔═════════════════════════════════╗',
+    style: {
+        fg: '#00d9ff'
+    }
+})
+
+blessed.text({
+    parent: form,
+    top: 2,
+    left: 'center',
+    content: 'Welcome to RacerFS Terminal',
+    style: {
+        fg: 'white',
+        bold: true
+    }
+})
+
+blessed.text({
+    parent: form,
+    top: 3,
+    left: 'center',
+    content: '╚═════════════════════════════════╝',
+    style: {
+        fg: '#00d9ff'
+    }
+})
+
+// Username section
+blessed.text({
+    parent: form,
+    top: 6,
+    left: 4,
+    content: '┌─ Username ─────────────────────────────────────────┐',
+    style: {
+        fg: '#888888'
+    }
+})
+
+const usernameInput = blessed.textbox({
+    parent: form,
+    name: 'username',
+    top: 7,
+    left: 6,
+    height: 1,
+    width: 54,
+    inputOnFocus: true,
+    keys: true,
+    mouse: true,
+    style: {
+        fg: '#ffffff',
+        bg: '#1a1a1a',
+        focus: {
+            fg: '#00ff00',
+            bg: '#2a2a2a'
         }
     }
-}
+})
 
-type AuthMode = "menu" | "login" | "register" | "otp"
-type InputField = "email" | "name"
+blessed.text({
+    parent: form,
+    top: 8,
+    left: 4,
+    content: '└────────────────────────────────────────────────────┘',
+    style: {
+        fg: '#888888'
+    }
+})
 
-const AuthScreen = ({ onAuthenticated }: { onAuthenticated: () => void }) => {
-    const [mode, setMode] = useState<AuthMode>("menu")
-    const [selectedIndex, setSelectedIndex] = useState(0)
-    const [activeField, setActiveField] = useState<InputField>("email")
-    
-    const [email, setEmail] = useState("")
-    const [name, setName] = useState("")
-    const [otp, setOtp] = useState("")
-    
-    const [loading, setLoading] = useState(false)
-    const [message, setMessage] = useState("")
-    const [error, setError] = useState("")
+// Password section
+blessed.text({
+    parent: form,
+    top: 10,
+    left: 4,
+    content: '┌─ Password ─────────────────────────────────────────┐',
+    style: {
+        fg: '#888888'
+    }
+})
 
-    const menuOptions = ["Login", "Register"]
-    const loginFields: InputField[] = ["email"]
-    const registerFields: InputField[] = ["name", "email"]
-
-    useInput(async (input, key) => {
-        if (loading) return
-
-        // Menu mode
-        if (mode === "menu") {
-            if (key.upArrow) {
-                setSelectedIndex(prev => prev > 0 ? prev - 1 : menuOptions.length - 1)
-            } else if (key.downArrow) {
-                setSelectedIndex(prev => prev < menuOptions.length - 1 ? prev + 1 : 0)
-            } else if (key.return) {
-                if (selectedIndex === 0) {
-                    setMode("login")
-                    setActiveField("email")
-                } else {
-                    setMode("register")
-                    setActiveField("name")
-                }
-                setError("")
-                setMessage("")
-            }
-            return
+const passwordInput = blessed.textbox({
+    parent: form,
+    name: 'password',
+    top: 11,
+    left: 6,
+    height: 1,
+    width: 54,
+    inputOnFocus: true,
+    keys: true,
+    mouse: true,
+    censor: true,
+    style: {
+        fg: '#ffffff',
+        bg: '#1a1a1a',
+        focus: {
+            fg: '#00ff00',
+            bg: '#2a2a2a'
         }
+    }
+})
 
-        // OTP mode
-        if (mode === "otp") {
-            if (key.return && otp.length === 6) {
-                setLoading(true)
-                setError("")
-                try {
-                    const result = await mockBackendAPI.verifyOTP(email, otp)
-                    if (result.success) {
-                        setMessage(result.message)
-                        setTimeout(() => onAuthenticated(), 1000)
-                    } else {
-                        setError(result.message)
-                        setOtp("")
-                    }
-                } catch (err) {
-                    setError("Terjadi kesalahan koneksi")
-                } finally {
-                    setLoading(false)
-                }
-            } else if (key.backspace || key.delete) {
-                setOtp(prev => prev.slice(0, -1))
-            } else if (input && /^\d$/.test(input) && otp.length < 6) {
-                setOtp(prev => prev + input)
-            } else if (key.escape) {
-                setMode("menu")
-                setOtp("")
-                setEmail("")
-                setName("")
-                setError("")
-                setMessage("")
-            }
-            return
-        }
+blessed.text({
+    parent: form,
+    top: 12,
+    left: 4,
+    content: '└────────────────────────────────────────────────────┘',
+    style: {
+        fg: '#888888'
+    }
+})
 
-        // Login/Register mode
-        const fields = mode === "login" ? loginFields : registerFields
+// Status message
+const statusMessage = blessed.text({
+    parent: form,
+    top: 14,
+    left: 'center',
+    content: '[Tab] Switch | [Enter] Login | [Esc] Exit',
+    style: {
+        fg: '#ffff00',
+        bold: false
+    }
+})
+
+// Handle form submit
+form.on('submit', (data: any) => {
+    const username = data.username || ''
+    const password = data.password || ''
+    
+    if (!username || !password) {
+        statusMessage.setContent('Please fill in all fields')
+        statusMessage.style.fg = 'red'
+        screen.render()
+        usernameInput.focus()
+        return
+    }
+    
+    // Simple validation (ganti dengan logic sebenarnya)
+    if (username === 'admin' && password === 'admin') {
+        statusMessage.setContent('Login successful! Welcome, ' + username)
+        statusMessage.style.fg = 'green'
+        screen.render()
         
-        if (key.tab || key.downArrow) {
-            const currentIndex = fields.indexOf(activeField)
-            const nextIndex = (currentIndex + 1) % fields.length
-            setActiveField(fields[nextIndex])
-        } else if (key.upArrow) {
-            const currentIndex = fields.indexOf(activeField)
-            const prevIndex = currentIndex === 0 ? fields.length - 1 : currentIndex - 1
-            setActiveField(fields[prevIndex])
-        } else if (key.return) {
-            // Submit form
-            if (mode === "login" && email) {
-                setLoading(true)
-                setError("")
-                try {
-                    const result = await mockBackendAPI.login(email)
-                    if (result.success) {
-                        setMessage(result.message)
-                        setMode("otp")
-                        setOtp("")
-                    } else {
-                        setError("Login gagal")
-                    }
-                } catch (err) {
-                    setError("Terjadi kesalahan koneksi")
-                } finally {
-                    setLoading(false)
-                }
-            } else if (mode === "register" && email && name) {
-                setLoading(true)
-                setError("")
-                try {
-                    const result = await mockBackendAPI.register(email, name)
-                    if (result.success) {
-                        setMessage(result.message)
-                        setMode("otp")
-                        setOtp("")
-                    } else {
-                        setError("Registrasi gagal")
-                    }
-                } catch (err) {
-                    setError("Terjadi kesalahan koneksi")
-                } finally {
-                    setLoading(false)
-                }
-            }
-        } else if (key.escape) {
-            setMode("menu")
-            setEmail("")
-            setName("")
-            setError("")
-            setMessage("")
-        } else if (key.backspace || key.delete) {
-            if (activeField === "email") {
-                setEmail(prev => prev.slice(0, -1))
-            } else if (activeField === "name") {
-                setName(prev => prev.slice(0, -1))
-            }
-        } else if (input && input.length === 1) {
-            if (activeField === "email") {
-                setEmail(prev => prev + input)
-            } else if (activeField === "name") {
-                setName(prev => prev + input)
-            }
-        }
-    })
-
-    return (
-        <Box flexDirection="column" padding={1}>
-            <Box borderStyle="round" borderColor="cyan" padding={1} marginBottom={1}>
-                <Text bold color="cyan">RacerFS Authentication</Text>
-            </Box>
-
-            {mode === "menu" && (
-                <Box flexDirection="column" borderStyle="round" borderColor="magenta" padding={1}>
-                    <Text bold color="yellow" marginBottom={1}>Pilih Mode Autentikasi</Text>
-                    {menuOptions.map((option, index) => (
-                        <Box key={option}>
-                            <Text color={index === selectedIndex ? "green" : "white"}>
-                                {index === selectedIndex ? "▶ " : "  "}
-                                {option}
-                            </Text>
-                        </Box>
-                    ))}
-                    <Box marginTop={1}>
-                        <Text dimColor>↑/↓ untuk navigasi, Enter untuk pilih</Text>
-                    </Box>
-                </Box>
-            )}
-
-            {(mode === "login" || mode === "register") && (
-                <Box flexDirection="column" borderStyle="round" borderColor="blue" padding={1}>
-                    <Text bold color="yellow" marginBottom={1}>
-                        {mode === "login" ? "Login" : "Register"}
-                    </Text>
-
-                    {mode === "register" && (
-                        <Box marginBottom={1}>
-                            <Text color={activeField === "name" ? "green" : "white"}>
-                                {activeField === "name" ? "▶ " : "  "}Nama: {name}
-                                {activeField === "name" && <Text color="green">_</Text>}
-                            </Text>
-                        </Box>
-                    )}
-
-                    <Box marginBottom={1}>
-                        <Text color={activeField === "email" ? "green" : "white"}>
-                            {activeField === "email" ? "▶ " : "  "}Email: {email}
-                            {activeField === "email" && <Text color="green">_</Text>}
-                        </Text>
-                    </Box>
-
-                    {loading && (
-                        <Box marginTop={1}>
-                            <Text color="cyan">Loading...</Text>
-                        </Box>
-                    )}
-
-                    {error && (
-                        <Box marginTop={1}>
-                            <Text color="red">{error}</Text>
-                        </Box>
-                    )}
-
-                    {message && (
-                        <Box marginTop={1}>
-                            <Text color="green">{message}</Text>
-                        </Box>
-                    )}
-
-                    <Box marginTop={1}>
-                        <Text dimColor>Tab/↑/↓ untuk pindah field, Enter untuk submit, Esc untuk kembali</Text>
-                    </Box>
-                </Box>
-            )}
-
-            {mode === "otp" && (
-                <Box flexDirection="column" borderStyle="round" borderColor="green" padding={1}>
-                    <Text bold color="yellow" marginBottom={1}>Verifikasi OTP</Text>
-                    <Text color="white" marginBottom={1}>
-                        Masukkan kode 6 digit yang dikirim ke {email}
-                    </Text>
-
-                    <Box marginBottom={1}>
-                        <Text color="cyan">
-                            Kode OTP: {otp.split("").map((digit, i) => (
-                                <Text key={i} color="green">{digit} </Text>
-                            ))}
-                            {otp.length < 6 && <Text color="green">_</Text>}
-                        </Text>
-                    </Box>
-
-                    {loading && (
-                        <Box marginTop={1}>
-                            <Text color="cyan">Memverifikasi...</Text>
-                        </Box>
-                    )}
-
-                    {error && (
-                        <Box marginTop={1}>
-                            <Text color="red">{error}</Text>
-                        </Box>
-                    )}
-
-                    {message && (
-                        <Box marginTop={1}>
-                            <Text color="green">{message}</Text>
-                        </Box>
-                    )}
-
-                    <Box marginTop={1}>
-                        <Text dimColor>Ketik 6 digit angka, Enter untuk verifikasi, Esc untuk kembali</Text>
-                    </Box>
-                    <Box marginTop={1}>
-                        <Text dimColor color="yellow">Hint: Gunakan kode 123456 untuk testing</Text>
-                    </Box>
-                </Box>
-            )}
-        </Box>
-    )
-}
-
-const Dashboard = () => {
-    const [time, setTime] = useState(new Date())
-    const [selectedIndex, setSelectedIndex] = useState(0)
-    const [selectedOption, setSelectedOption] = useState<string | null>(null)
-
-    const options = [
-        "View System Logs",
-        "Manage Services",
-        "Configure Settings",
-        "Run Diagnostics",
-        "Exit Dashboard"
-    ]
-
-    useInput((input, key) => {
-        if (key.upArrow) {
-            setSelectedIndex((prev) => (prev > 0 ? prev - 1 : options.length - 1))
-        } else if (key.downArrow) {
-            setSelectedIndex((prev) => (prev < options.length - 1 ? prev + 1 : 0))
-        } else if (key.return) {
-            setSelectedOption(options[selectedIndex])
-        }
-    })
-
-    useEffect(() => {
-        const timer = setInterval(() => {
-            setTime(new Date())
-        }, 1000)
-        return () => clearInterval(timer)
-    }, [])
-
-    const stats = {
-        cpuUsage: Math.floor(Math.random() * 100),
-        memoryUsage: Math.floor(Math.random() * 100),
-        activeProcesses: Math.floor(Math.random() * 50) + 10
+        // Keluar setelah 2 detik
+        setTimeout(() => {
+            process.exit(0)
+        }, 2000)
+    } else {
+        statusMessage.setContent('Invalid username or password')
+        statusMessage.style.fg = 'red'
+        screen.render()
+        passwordInput.clearValue()
+        usernameInput.focus()
     }
+})
 
-    return (
-        <Box flexDirection="column" padding={1}>
-            <Box borderStyle="round" borderColor="cyan" padding={1} marginBottom={1}>
-                <Text bold color="cyan">RacerFS Dashboard</Text>
-            </Box>
+// Tab navigation
+usernameInput.key('tab', () => {
+    passwordInput.focus()
+})
 
-            <Box flexDirection="column" borderStyle="round" borderColor="green" padding={1} marginBottom={1}>
-                <Text bold color="yellow">System Time</Text>
-                <Text color="white">{time.toLocaleString()}</Text>
-            </Box>
+passwordInput.key('tab', () => {
+    usernameInput.focus()
+})
 
-            <Box flexDirection="column" borderStyle="round" borderColor="blue" padding={1} marginBottom={1}>
-                <Text bold color="yellow">System Statistics</Text>
-                <Box flexDirection="column" paddingLeft={1}>
-                    <Text>
-                        <Text color="green">CPU Usage:</Text> {stats.cpuUsage}%
-                    </Text>
-                    <Text>
-                        <Text color="magenta">Memory Usage:</Text> {stats.memoryUsage}%
-                    </Text>
-                    <Text>
-                        <Text color="cyan">Active Processes:</Text> {stats.activeProcesses}
-                    </Text>
-                </Box>
-            </Box>
+// Enter on password field submits form
+passwordInput.on('submit', () => {
+    form.submit()
+})
 
-            <Box flexDirection="column" borderStyle="round" borderColor="magenta" padding={1} marginBottom={1}>
-                <Text bold color="yellow">Select an Action</Text>
-                <Box flexDirection="column" paddingLeft={1} paddingTop={1}>
-                    {options.map((option, index) => (
-                        <Box key={option}>
-                            <Text color={index === selectedIndex ? "green" : "white"}>
-                                {index === selectedIndex ? "▶ " : "  "}
-                                {option}
-                            </Text>
-                        </Box>
-                    ))}
-                </Box>
-                {selectedOption && (
-                    <Box marginTop={1} paddingLeft={1}>
-                        <Text color="cyan">Selected: {selectedOption}</Text>
-                    </Box>
-                )}
-            </Box>
+usernameInput.on('submit', () => {
+    passwordInput.focus()
+})
 
-            <Box borderStyle="round" borderColor="gray" padding={1}>
-                <Text dimColor>Use ↑/↓ arrows to navigate, Enter to select • Ctrl+C to exit</Text>
-            </Box>
-        </Box>
-    )
-}
+// Quit on Escape or Ctrl-C
+screen.key(['escape', 'C-c'], () => {
+    return process.exit(0)
+})
 
-const App = () => {
-    const [isAuthenticated, setIsAuthenticated] = useState(false)
+// Focus username input initially
+usernameInput.focus()
 
-    return isAuthenticated ? (
-        <Dashboard />
-    ) : (
-        <AuthScreen onAuthenticated={() => setIsAuthenticated(true)} />
-    )
-}
-
-render(<App />)
+screen.render()

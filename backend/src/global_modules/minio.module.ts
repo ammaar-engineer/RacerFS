@@ -13,7 +13,7 @@ export const MINIO_CLIENT = "MINIO_CLIENT"
       useFactory(configService: ConfigService) {
         return new Minio.Client({
           endPoint: configService.get<string>('MINIO_HOST') as string,
-          port: 80,
+          port: 9000,
           useSSL: false,
           accessKey: configService.get<string>('MINIO_ACCESS_KEY') as string,
           secretKey: configService.get<string>('MINIO_SECRET_KEY') as string,

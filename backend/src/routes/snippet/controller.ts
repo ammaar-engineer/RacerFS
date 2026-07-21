@@ -1,13 +1,13 @@
 import { Body, Controller, Delete, Get, Headers, Patch, Post, Query } from "@nestjs/common";
 import { SuccessResponse } from "src/utilities/Success.Response";
-import { PermissionBridge } from "src/global_bridge/permission.bridge";
 import { SnippetRawModules, SnippetListHeaderDTO, SnippetCreateHeaderDTO, SnippetCreateBodyDTO, SnippetDeleteHeaderDTO, SnippetDeleteQueryDTO, SnippetEditHeaderDTO, SnippetEditQueryDTO, SnippetEditBodyDTO } from "./raw.main";
 import { SnippetDbModules } from "./db.main";
+import { PermissionGlobalBridge } from "src/global_bridge/permission.bridge";
 
 @Controller("snippet")
 export class SnippetRouteController {
     constructor(
-        private readonly permissionBridge: PermissionBridge,
+        private readonly permissionBridge: PermissionGlobalBridge,
         private readonly rawSnippet: SnippetRawModules,
         private readonly dbSnippet: SnippetDbModules,
     ) {}

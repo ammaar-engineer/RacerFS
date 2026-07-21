@@ -3,7 +3,7 @@ import { UnauthorizedException } from "src/CustomExceptionHandle";
 import { JwtService, JwtModule } from "./jwt.module";
 
 @Injectable()
-export class PermissionBridge {
+export class PermissionGlobalBridge {
     constructor(private readonly jwtService: JwtService) {}
 
     isValidAccountToken(token: string): {user_id: number, type: 'account_token'} {
@@ -43,7 +43,7 @@ export class PermissionBridge {
 @Global()
 @Module({
     imports: [JwtModule],
-    providers: [PermissionBridge],
-    exports: [PermissionBridge]
+    providers: [PermissionGlobalBridge],
+    exports: [PermissionGlobalBridge]
 })
 export class PermissionBridgeModule {}

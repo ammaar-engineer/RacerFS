@@ -1,15 +1,15 @@
 import { Body, Controller, Delete, Get, Headers, Patch, Post, Query, Res } from "@nestjs/common";
 import { SuccessResponse } from "src/utilities/Success.Response";
-import { PermissionBridge } from "src/global_bridge/permission.bridge";
 import { FileBridgeModules } from "./bridge.main";
 import { FileDbModules } from "./db/db.main";
 import { FileRawModules, FileListHeaderDTO, FileRenameHeaderDTO, FileRenameQueryDTO, FileDownloadHeaderDTO, FileDownloadQueryDTO, FileGetPresignedUploadQueryDTO, FileGetPresignedUploadHeaderDTO, FileConfirmUploadHeaderDTO, FileConfirmUploadQueryDTO, FileDeleteHeadersDTO, FileDeleteQueryDTO, FileGenerateAccessTokenHeaderDTO, FileDeleteAccessTokenHeaderDTO, FileDeleteAccessTokenQueryDTO, FileSetVisibilityHeaderDTO, FileSetVisibilityQueryDTO, FileSetVisibilityBodyDTO } from "./raw.main";
 import { FileDbinioModules } from "./db/db.minio";
+import { PermissionGlobalBridge } from "src/global_bridge/permission.bridge";
 
 @Controller("file")
 export class FileRouteController {
     constructor(
-        private readonly permissionBridge: PermissionBridge,
+        private readonly permissionBridge: PermissionGlobalBridge,
         private readonly bridgeFile: FileBridgeModules,
         private readonly dbFile: FileDbModules,
         private readonly rawFile: FileRawModules,
@@ -19,6 +19,7 @@ export class FileRouteController {
     async getFileList(
         @Headers() headers: Record<string, string>,
     ) {
+        console.log("[GET /file/list] hit")
         const headerData = await this.rawFile.validateSourceDTO(FileListHeaderDTO, headers)
         await this.dbFile.AccessTokenShouldBe("exist", headerData['access-token'])
         const {isOwner, accountToken_user_id} = await this.permissionBridge.isOwnerAction(
@@ -39,6 +40,7 @@ export class FileRouteController {
         @Headers() headers: Record<string, string>,
         @Query() query: Record<string, string>,
     ) {
+        console.log("[GET /file/download-url] hit")
         const headerData = await this.rawFile.validateSourceDTO(FileDownloadHeaderDTO, headers)
         const queryData = await this.rawFile.validateSourceDTO(FileDownloadQueryDTO, query)
         const { accountToken_user_id } = await this.permissionBridge.isOwnerAction(
@@ -59,6 +61,7 @@ export class FileRouteController {
         @Headers() headers: Record<string, string>,
         @Query() query: Record<string, string>,
     ) {
+        console.log("[PATCH /file/rename] hit")
         const headerData = await this.rawFile.validateSourceDTO(FileRenameHeaderDTO, headers)
         const queryData = await this.rawFile.validateSourceDTO(FileRenameQueryDTO, query)
         const { accountToken_user_id } = await this.permissionBridge.isOwnerAction(
@@ -79,6 +82,7 @@ export class FileRouteController {
         @Query() query: Record<string, string>,
         @Headers() headers: Record<string, string>
     ) {
+        console.log("[GET /file/upload-url] hit")
         const queryData = await this.rawFile.validateSourceDTO(FileGetPresignedUploadQueryDTO, query)
         const headerData = await this.rawFile.validateSourceDTO(FileGetPresignedUploadHeaderDTO, headers)
         const {user_id} = this.permissionBridge.isValidAccountToken(headerData['authorization'])
@@ -93,7 +97,7 @@ export class FileRouteController {
             queryData['file-name'],
             Number(headerData['file-size'])
         )
-        const url = await this.minioFile.getPresignedUploadUrl(file_key)
+        const {url} = await this.minioFile.getPresignedUploadUrl(file_key)
         return SuccessResponse("Upload URL generated successfully", { url, file_key })
     }
 
@@ -102,6 +106,7 @@ export class FileRouteController {
         @Query() query: Record<string, string>,
         @Headers() headers: Record<string, string>
     ) {
+        console.log("[POST /file/confirm-upload] hit")
         const queryData = await this.rawFile.validateSourceDTO(FileConfirmUploadQueryDTO, query)
         const headerData = await this.rawFile.validateSourceDTO(FileConfirmUploadHeaderDTO, headers)
         const {user_id} = this.permissionBridge.isValidAccountToken(headerData['authorization'])
@@ -119,7 +124,10 @@ export class FileRouteController {
     async generatePermissionKey(
         @Headers() headers: Record<string, string>
     ) {
+        console.log("[POST /file/generate-access-token] hit")
+        console.log(headers['authorization'])
         const headerData = await this.rawFile.validateSourceDTO(FileGenerateAccessTokenHeaderDTO, headers)
+        console.log("ISI HEADER", headerData['authorization'])
         const {user_id} = this.permissionBridge.isValidAccountToken(headerData['authorization'])
         const token = await this.bridgeFile.generateAccessToken(user_id)
         await this.dbFile.createAccessToken(user_id, token)
@@ -131,6 +139,7 @@ export class FileRouteController {
         @Headers() headers: Record<string, string>,
         @Query() query: Record<string, string>
     ) {
+        console.log("[DELETE /file/delete-file] hit")
         const headerData = await this.rawFile.validateSourceDTO(FileDeleteHeadersDTO, headers)   
         const queryData = await this.rawFile.validateSourceDTO(FileDeleteQueryDTO, query)
         const {user_id} = this.permissionBridge.isValidAccountToken(headerData['authorization'])
@@ -149,6 +158,7 @@ export class FileRouteController {
         @Headers() headers: Record<string, string>,
         @Query() query: Record<string, string>
     ) {
+        console.log("[DELETE /file/delete-access-token] hit")
         const headerData = await this.rawFile.validateSourceDTO(FileDeleteAccessTokenHeaderDTO, headers)
         const queryData = await this.rawFile.validateSourceDTO(FileDeleteAccessTokenQueryDTO, query)
         const {user_id} = this.permissionBridge.isValidAccountToken(headerData['authorization'])
@@ -162,6 +172,7 @@ export class FileRouteController {
         @Query() query: Record<string, string>,
         @Body() body: Record<string, any>
     ) {
+        console.log("[PATCH /file/set-visibility] hit")
         const headerData = await this.rawFile.validateSourceDTO(FileSetVisibilityHeaderDTO, headers)
         const queryData = await this.rawFile.validateSourceDTO(FileSetVisibilityQueryDTO, query)
         const bodyData = await this.rawFile.validateSourceDTO(FileSetVisibilityBodyDTO, body)
