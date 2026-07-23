@@ -13,6 +13,42 @@ export enum TokenType {
   "account_token"="account_token"
 }
 
+@Entity("User")
+export class User {
+  @PrimaryGeneratedColumn()
+  id!: number;
+
+  @Column({ type: "varchar", length: 40, unique: true })
+  email!: string;
+
+  @Column({
+    type: 'bigint', 
+    nullable: false, 
+    default: 104857600
+  })
+  storage_size!: number
+
+  @Column({
+    type: 'bigint', 
+    nullable: false,
+    default: 0
+  })
+  used_storage!: number
+
+  @CreateDateColumn({ type: "timestamp with time zone" })
+  created_at!: Date;
+
+  // Relations
+  @OneToMany(() => Snippet, (snippet) => snippet.user, { cascade: true })
+  snippets!: Snippet[];
+
+  @OneToMany(() => Token, (token) => token.user_id)
+  tokens!: Token[]
+
+  @OneToMany(() => File, (file) => file.user, { cascade: true })
+  files!: File[];
+}
+
 @Entity('Token')
 export class Token {
   @PrimaryGeneratedColumn()
@@ -33,28 +69,6 @@ export class Token {
   @ManyToOne(() => User, (user) => user.tokens, { onDelete: 'CASCADE' })
   @JoinColumn({ name: 'user_id' })
   user!: User;
-}
-
-@Entity("User")
-export class User {
-  @PrimaryGeneratedColumn()
-  id!: number;
-
-  @Column({ type: "varchar", length: 40, unique: true })
-  email!: string;
-
-  @CreateDateColumn({ type: "timestamp with time zone" })
-  created_at!: Date;
-
-  // Relations
-  @OneToMany(() => Snippet, (snippet) => snippet.user, { cascade: true })
-  snippets!: Snippet[];
-
-  @OneToMany(() => Token, (token) => token.user_id)
-  tokens!: Token[]
-
-  @OneToMany(() => File, (file) => file.user, { cascade: true })
-  files!: File[];
 }
 
 @Entity("Snippet")

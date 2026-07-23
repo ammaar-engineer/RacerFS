@@ -1,92 +1,60 @@
-import { Body, Controller, Post } from "@nestjs/common";
-import { InjectRepository } from "@nestjs/typeorm";
-import { Token, User } from "src/entity";
+import { Body, Controller, Delete, Get, Post } from "@nestjs/common";
 import { SuccessResponse } from "src/utilities/Success.Response";
-import { UserRegisterDTO, VerifyOtpDTO, UserLoginDTO } from "./dto";
-import { Repository } from "typeorm";
-import { UserService } from "./service";
-import { JwtService } from "src/global_services/jwt.module";
-import { UserValidationService } from "./validation";
-import { NotFoundException } from "src/CustomExceptionHandle";
+import { UserDeleteAccount, UserLoginDTO, UserRegisterDTO, VerifyOtpDTO } from "src/validation/user.route.dto";
+import { UserServices } from "src/services/user.services";
+import { AuthServices } from "src/services/auth.services";
+import { JwtService } from "src/global_modules/jwt.module";
 
 @Controller("user")
 export class UserController {
     constructor(
-        @InjectRepository(User) private readonly userRepo: Repository<User>,
-        private readonly jwtService: JwtService,
-        private readonly userService: UserService,
-        private readonly validationService: UserValidationService,
-        @InjectRepository(Token) private readonly tokenRepo: Repository<Token>
+        private readonly userServices: UserServices,
+        private readonly authServices: AuthServices,
+        private readonly jwtService: JwtService
     ) {}
 
     @Post('register')
     async UserRegister(@Body() body: UserRegisterDTO) {
         const {email} = body
-        // Validasi email belum terdaftar
-        await this.validationService.validateEmailNotExists(email);
-        // Generate OTP dan simpan ke Redis
-        const { sessionId, otp } = await this.userService.generateOtp(email, 'register')
-        // Debug
-        console.log("ISI EMAIL= ", email, otp, sessionId) 
-        // Kirim OTP ke email
-        await this.userService.sendOtpCodeToEmail(email, otp, 'register')
+        const {sessionId} = await this.authServices.createRegisterSession(email)
         return SuccessResponse("OTP Has been sent to your email", { sessionId })
     }
 
     @Post('login')
     async UserLogin(@Body() body: UserLoginDTO) {
         const {email} = body
-        await this.validationService.validateEmailExists(email);
-        // Generate OTP dan simpan ke Redis
-        const { sessionId, otp } = await this.userService.generateOtp(email, 'login')
-        // Buat debug
-        console.log("ISI EMAIL= ", email, otp, sessionId) 
-        // Kirim OTP ke email
-        await this.userService.sendOtpCodeToEmail(email, otp, 'login')
+        const {sessionId} = await this.authServices.createLoginSession(email)
         return SuccessResponse("OTP Has been sent to your email", { sessionId })
     }
 
     @Post("verify-otp")
     async VerifyOtp(@Body() body: VerifyOtpDTO) {
-        const { sessionId, otp } = body;
-        // Validasi OTP menggunakan service
-        const { email, action } = await this.userService.findClientOtp(sessionId, otp);
-        // If login
-        if (action === 'login') {
-            const findEmail = await this.userRepo.findOne({
-                where: {
-                    email: email
-                }
-            })
-            if (!findEmail) {
-                throw new NotFoundException("Email not found")
-            }
-            return SuccessResponse("Login successful", { 
-                email,
-                userId: this.jwtService.generateJwt({user_id: findEmail?.id})
-            });
-        }
-        // Register
-        // Insert user
-        const newUser = this.userRepo.create({ email });
-        const {id} = await this.userRepo.save(newUser);
-        // Insert file access token for first user
-        const createPrivateToken = this.tokenRepo.create({
-            token: this.jwtService.generateJwt({
-                type: "file_access_token"
-            }),
-            user_id: id,
-            type: "file_access_token"
-        })
-        await this.tokenRepo.save(createPrivateToken)
-        // Create auth token
-        const jwtToken = this.jwtService.generateJwt({
-            user_id: id,
+        const { sessionId, otp: rawOtp } = body;
+        const {email, action} = await this.authServices.verifyOtp(rawOtp, sessionId)
+        const {token} = await this.userServices.OtpAction(action, email)
+        return SuccessResponse(`${action} successfully`, {token})
+    }
+
+    @Delete("delete")
+    async deleteAccount(
+        @Body() body: UserDeleteAccount
+    ) {
+        const {email} = body
+        await this.userServices.isEmail('exist', email)
+        await this.userServices.deleteUser(email)
+        SuccessResponse("Account has been deleted")
+    }
+
+    @Get("create-test-account")
+    async createTestAccount() {
+        const createEmail = await this.userServices.createNewEmail("ammaar@gmail.com")
+        const token = this.jwtService.generateJwt({
+            user_id: createEmail.id,
             type: "account_token"
         })
-        return SuccessResponse("OTP verified successfully and user created", { 
-            token: jwtToken
-        });
+        return SuccessResponse("Account for test and token", {
+            token
+        })
     }
 
 }
