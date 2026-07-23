@@ -17,3 +17,7 @@ export class UserLoginDTO {
     @IsEmail()
     email!: string;
 }
+export class UserDeleteAccount {
+    @IsEmail()
+    email!: string
+}

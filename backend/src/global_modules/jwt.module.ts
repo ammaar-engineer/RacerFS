@@ -15,14 +15,7 @@ export class JwtService {
         }
     }
 
-    /**
-     * Generate JWT token
-     * @param payload Object containing data to be encoded in the token
-     * @param expiresIn Token expiration time in seconds (default: 691200 = 8 days)
-     * @returns JWT token string
-     */
     generateJwt(payload: object | string, expireTime: number = 691200): string {
-        // Pastikan string JSON di-parse menjadi object agar klaim 'expiresIn' bisa ditanam oleh library
         const formattedPayload = typeof payload === 'string' ? JSON.parse(payload) : payload;
 
         return jwt.sign(formattedPayload, this.secretKey, {
@@ -30,12 +23,6 @@ export class JwtService {
         });
     }
 
-    /**
-     * Verify JWT token
-     * @param token JWT token string
-     * @returns Decoded payload if valid
-     * @throws UnauthorizedException if token is invalid or expired
-     */
     verifyJwt<T = any>(token: string): T {
         try {
             return jwt.verify(token, this.secretKey) as T;
@@ -51,6 +38,7 @@ export class JwtService {
     }
 }
 
+@Global()
 @Module({
     imports: [ConfigModule],
     providers: [JwtService],

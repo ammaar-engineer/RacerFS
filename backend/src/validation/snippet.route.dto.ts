@@ -1,6 +1,4 @@
-import { Injectable } from "@nestjs/common"
-import { plainToInstance } from "class-transformer"
-import { IsNotEmpty, IsOptional, IsString, validateOrReject } from "class-validator"
+import { IsNotEmpty, IsOptional, IsString } from "class-validator"
 
 // --- list ---
 export class SnippetListHeaderDTO {
@@ -56,15 +54,4 @@ export class SnippetEditBodyDTO {
     @IsString()
     @IsNotEmpty()
     "command"!: string
-}
-
-@Injectable()
-export class SnippetRawModules {
-    async validateSourceDTO<T extends object>(dto: new () => T, source: any) {
-        const dtoClass = plainToInstance(dto, source, {
-            excludeExtraneousValues: false
-        })
-        await validateOrReject(dtoClass)
-        return dtoClass
-    }
 }

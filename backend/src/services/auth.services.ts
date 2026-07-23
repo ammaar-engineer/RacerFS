@@ -4,14 +4,16 @@ import { NotFoundException, UnauthorizedException } from "src/CustomExceptionHan
 import { REDIS_CLIENT } from "src/global_modules/redis.module";
 import crypto from 'crypto'
 import { otpGen } from "otp-gen-agent";
-import { UserDbModules } from "../db.main";
+import { UserServices } from "./user.services";
 
 @Injectable()
-export class SessionBridgeModules {
+export class AuthServices {
     constructor(
         @Inject(REDIS_CLIENT) private readonly redisService: ReturnType<typeof createClient>,
-        private readonly dbUser: UserDbModules
+        private readonly userServices: UserServices
     ) {}
+
+    // Session management methods
     async setAuthSession(email: string, action: 'login' | 'register') {
         const sessionId = crypto.randomUUID()
         const otp = await otpGen()
@@ -22,6 +24,7 @@ export class SessionBridgeModules {
         );
         return {sessionId}
     }
+
     async findAuthSession(sessionId: string): Promise<{email: string, otp: string, action: 'login' | 'register'}> {
         const sessionData = await this.redisService.get(`${sessionId}:auth`) as string
         if (!sessionData) {
@@ -29,10 +32,12 @@ export class SessionBridgeModules {
         }
         return JSON.parse(sessionData)
     }
+
     async deleteAuthSession(sessionId: string) {
         await this.redisService.del(`${sessionId}:auth`)
         return {sessionId}
     }
+
     async verifyOtp(otp: string, sessionId: string) {
         const {otp: realOtp, email, action} = await this.findAuthSession(sessionId)
         if (otp !== realOtp) {
@@ -41,13 +46,15 @@ export class SessionBridgeModules {
         await this.deleteAuthSession(sessionId)
         return {email, action}
     }
+
     async createRegisterSession(email: string) {
-        await this.dbUser.isEmail('notexist' ,email)
+        await this.userServices.isEmail('notexist' ,email)
         const {sessionId} = await this.setAuthSession(email, 'register')
         return {sessionId}
     }
+
     async createLoginSession(email: string) {
-        await this.dbUser.isEmail('exist', email)
+        await this.userServices.isEmail('exist', email)
         const {sessionId} = await this.setAuthSession(email, 'login')
         return {sessionId}
     }

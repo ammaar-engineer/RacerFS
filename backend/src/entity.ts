@@ -21,6 +21,20 @@ export class User {
   @Column({ type: "varchar", length: 40, unique: true })
   email!: string;
 
+  @Column({
+    type: 'bigint', 
+    nullable: false, 
+    default: 104857600
+  })
+  storage_size!: number
+
+  @Column({
+    type: 'bigint', 
+    nullable: false,
+    default: 0
+  })
+  used_storage!: number
+
   @CreateDateColumn({ type: "timestamp with time zone" })
   created_at!: Date;
 

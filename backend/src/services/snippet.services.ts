@@ -5,9 +5,9 @@ import { Repository } from "typeorm";
 import { ConflictException, NotFoundException } from "src/CustomExceptionHandle";
 
 @Injectable()
-export class SnippetDbModules {
+export class SnippetServices {
     constructor(
-        @InjectRepository(Snippet) private readonly snippetRepo: Repository<Snippet>
+        @InjectRepository(Snippet) private readonly snippetRepo: Repository<Snippet>,
     ) {}
 
     async snippetShouldBe(

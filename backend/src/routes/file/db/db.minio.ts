@@ -1,28 +1,25 @@
-import { Inject, Injectable } from "@nestjs/common"
-import * as Minio from "minio"
-import { MINIO_CLIENT } from "src/global_modules/minio.module"
+import { Injectable } from "@nestjs/common"
+import { FileServices } from "src/services/file.services"
 
 @Injectable()
 export class FileDbinioModules {
     constructor(
-        @Inject(MINIO_CLIENT) private readonly minioService: Minio.Client
+        private readonly fileServices: FileServices
     ) {}
+    
     async getPresignedDownloadUrl(objectName: string, expiry: number = 3600) {
-        const url = await this.minioService.presignedGetObject("racerfs-bucket", objectName, expiry)
-        return url
+        return this.fileServices.getPresignedDownloadUrl(objectName, expiry)
     }
-    async getPresignedUploadUrl(file_key: string, expiry: number = 3600) {
-        const url = await this.minioService.presignedPutObject("racerfs-bucket", file_key, expiry)
-        return {
-            url,
-            file_key
-        }
+    
+    async getPresignedUploadUrl(file_key: string, user_id: number, file_size: number, expiry: number = 3600) {
+        return this.fileServices.getPresignedUploadUrl(file_key, user_id, file_size, expiry)
     }
+    
     async statObject(objectName: string) {
-        const stat = await this.minioService.statObject("racerfs-bucket", objectName)
-        return { size: stat.size, etag: stat.etag }
+        return this.fileServices.statObject(objectName)
     }
+    
     async removeObject(objectName: string) {
-        await this.minioService.removeObject("racerfs-bucket", objectName)
+        return this.fileServices.removeObject(objectName)
     }
 }

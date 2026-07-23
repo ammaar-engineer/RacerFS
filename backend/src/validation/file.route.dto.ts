@@ -1,6 +1,4 @@
-import { Injectable } from "@nestjs/common"
-import { plainToInstance } from "class-transformer"
-import { IsBoolean, IsIn, IsNotEmpty, IsNumberString, IsString, validateOrReject } from "class-validator"
+import { IsBoolean, IsIn, IsNotEmpty, IsNumberString, IsString } from "class-validator"
 
 export class FileListHeaderDTO {
     @IsString()
@@ -126,16 +124,4 @@ export class FileSetVisibilityBodyDTO {
     @IsBoolean()
     @IsNotEmpty()
     "is_public"!: boolean
-}
-
-
-@Injectable()
-export class FileRawModules {
-    async validateSourceDTO<T>(dto: new () => T, source: any): Promise<T> {
-        const dtoClass = plainToInstance(dto, source, {
-            excludeExtraneousValues: false
-        })
-        await validateOrReject(dtoClass as () => T)
-        return dtoClass as T
-    }
 }

@@ -10,6 +10,7 @@ describe("File Workflow - User Journey", () => {
     let testAccountToken: string;
     let accessToken: string;
     let presignedUrl: string;
+    let formData: Record<string, string>;
     let fileKey: string;
 
     const fileName = "test-document.txt"
@@ -91,24 +92,31 @@ describe("File Workflow - User Journey", () => {
             expect(res.body.message).toBe("Upload URL generated successfully")
             expect(typeof res.body.data.url).toBe("string")
             expect(res.body.data.url.length).toBeGreaterThan(0)
+            expect(typeof res.body.data.formData).toBe("object")
             expect(typeof res.body.data.file_key).toBe("string")
             expect(res.body.data.file_key.length).toBeGreaterThan(0)
             console.log(res.body.data)
             presignedUrl = res.body.data.url
+            formData = res.body.data.formData
             fileKey = res.body.data.file_key
         })
     })
 
-    describe("Step 3: Upload mock file ke MinIO via presigned URL", () => {
+    describe("Step 3: Upload mock file ke MinIO via presigned POST", () => {
         it("Berhasil upload file ke MinIO", async () => {
+            const form = new FormData()
+            for (const [key, value] of Object.entries(formData)) {
+                form.append(key, value)
+            }
+            form.append("file", new Blob([fileContent]), fileName)
+
             const res = await fetch(presignedUrl, {
-                method: "PUT",
-                body: fileContent,
-                headers: { "Content-Type": "application/octet-stream" }
+                method: "POST",
+                body: form
             })
             console.log("ERROR STEP 3: ", res)
 
-            expect(res.status).toBe(200)
+            expect(res.status).toBe(204)
         })
     })
 

@@ -1,10 +1,16 @@
 import { Global, Module, Injectable } from "@nestjs/common";
 import { UnauthorizedException } from "src/CustomExceptionHandle";
-import { JwtService, JwtModule } from "./jwt.module";
+import { JwtService } from "src/global_modules/jwt.module";
 
 @Injectable()
-export class PermissionGlobalBridge {
-    constructor(private readonly jwtService: JwtService) {}
+export class TokenServices {
+    constructor(
+        private readonly jwtService: JwtService,
+    ) {}
+
+    generateToken(payload: { user_id: number, type: string }): string {
+        return this.jwtService.generateJwt(payload)
+    }
 
     isValidAccountToken(token: string): {user_id: number, type: 'account_token'} {
         const accountTokenValue = this.jwtService.verifyJwt(token)
@@ -42,8 +48,7 @@ export class PermissionGlobalBridge {
 
 @Global()
 @Module({
-    imports: [JwtModule],
-    providers: [PermissionGlobalBridge],
-    exports: [PermissionGlobalBridge]
+    providers: [TokenServices],
+    exports: [TokenServices]
 })
-export class PermissionBridgeModule {}
+export class TokenModule {}

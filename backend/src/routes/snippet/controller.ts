@@ -1,24 +1,25 @@
 import { Body, Controller, Delete, Get, Headers, Patch, Post, Query } from "@nestjs/common";
 import { SuccessResponse } from "src/utilities/Success.Response";
-import { SnippetRawModules, SnippetListHeaderDTO, SnippetCreateHeaderDTO, SnippetCreateBodyDTO, SnippetDeleteHeaderDTO, SnippetDeleteQueryDTO, SnippetEditHeaderDTO, SnippetEditQueryDTO, SnippetEditBodyDTO } from "./raw.main";
-import { SnippetDbModules } from "./db.main";
-import { PermissionGlobalBridge } from "src/global_bridge/permission.bridge";
+import { DtoUtilites } from "src/utilities/custom.dto.validator";
+import { SnippetListHeaderDTO, SnippetCreateHeaderDTO, SnippetCreateBodyDTO, SnippetDeleteHeaderDTO, SnippetDeleteQueryDTO, SnippetEditHeaderDTO, SnippetEditQueryDTO, SnippetEditBodyDTO } from "src/validation/snippet.route.dto";
+import { SnippetServices } from "src/services/snippet.services";
+import { TokenServices } from "src/services/token.services";
 
 @Controller("snippet")
 export class SnippetRouteController {
     constructor(
-        private readonly permissionBridge: PermissionGlobalBridge,
-        private readonly rawSnippet: SnippetRawModules,
-        private readonly dbSnippet: SnippetDbModules,
+        private readonly tokenServices: TokenServices,
+        private readonly dtoUtilites: DtoUtilites,
+        private readonly snippetServices: SnippetServices,
     ) {}
 
     @Get("list")
     async getSnippetList(
         @Headers() headers: Record<string, string>
     ) {
-        const headerData = await this.rawSnippet.validateSourceDTO(SnippetListHeaderDTO, headers)
-        const { user_id } = this.permissionBridge.isValidAccountToken(headerData['authorization'])
-        const snippets = await this.dbSnippet.getSnippetList(user_id)
+        const headerData = await this.dtoUtilites.validateSourceDTO(SnippetListHeaderDTO, headers)
+        const { user_id } = this.tokenServices.isValidAccountToken(headerData['authorization'])
+        const snippets = await this.snippetServices.getSnippetList(user_id)
         return SuccessResponse("Snippet list retrieved successfully", { snippets })
     }
 
@@ -27,10 +28,10 @@ export class SnippetRouteController {
         @Headers() headers: Record<string, string>,
         @Body() body: Record<string, any>
     ) {
-        const headerData = await this.rawSnippet.validateSourceDTO(SnippetCreateHeaderDTO, headers)
-        const bodyData = await this.rawSnippet.validateSourceDTO(SnippetCreateBodyDTO, body)
-        const { user_id } = this.permissionBridge.isValidAccountToken(headerData['authorization'])
-        const snippet = await this.dbSnippet.createSnippet({
+        const headerData = await this.dtoUtilites.validateSourceDTO(SnippetCreateHeaderDTO, headers)
+        const bodyData = await this.dtoUtilites.validateSourceDTO(SnippetCreateBodyDTO, body)
+        const { user_id } = this.tokenServices.isValidAccountToken(headerData['authorization'])
+        const snippet = await this.snippetServices.createSnippet({
             alias: bodyData['alias'],
             description: bodyData['description'],
             command: bodyData['command'],
@@ -52,10 +53,10 @@ export class SnippetRouteController {
         @Headers() headers: Record<string, string>,
         @Query() query: Record<string, string>
     ) {
-        const headerData = await this.rawSnippet.validateSourceDTO(SnippetDeleteHeaderDTO, headers)
-        const queryData = await this.rawSnippet.validateSourceDTO(SnippetDeleteQueryDTO, query)
-        const { user_id } = this.permissionBridge.isValidAccountToken(headerData['authorization'])
-        await this.dbSnippet.deleteSnippet(queryData['alias'], user_id)
+        const headerData = await this.dtoUtilites.validateSourceDTO(SnippetDeleteHeaderDTO, headers)
+        const queryData = await this.dtoUtilites.validateSourceDTO(SnippetDeleteQueryDTO, query)
+        const { user_id } = this.tokenServices.isValidAccountToken(headerData['authorization'])
+        await this.snippetServices.deleteSnippet(queryData['alias'], user_id)
         return SuccessResponse(`Snippet '${queryData['alias']}' deleted successfully`)
     }
 
@@ -65,11 +66,11 @@ export class SnippetRouteController {
         @Query() query: Record<string, string>,
         @Body() body: Record<string, any>
     ) {
-        const headerData = await this.rawSnippet.validateSourceDTO(SnippetEditHeaderDTO, headers)
-        const queryData = await this.rawSnippet.validateSourceDTO(SnippetEditQueryDTO, query)
-        const bodyData = await this.rawSnippet.validateSourceDTO(SnippetEditBodyDTO, body)
-        const { user_id } = this.permissionBridge.isValidAccountToken(headerData['authorization'])
-        const result = await this.dbSnippet.updateSnippet(queryData['alias'], user_id, bodyData['command'])
+        const headerData = await this.dtoUtilites.validateSourceDTO(SnippetEditHeaderDTO, headers)
+        const queryData = await this.dtoUtilites.validateSourceDTO(SnippetEditQueryDTO, query)
+        const bodyData = await this.dtoUtilites.validateSourceDTO(SnippetEditBodyDTO, body)
+        const { user_id } = this.tokenServices.isValidAccountToken(headerData['authorization'])
+        const result = await this.snippetServices.updateSnippet(queryData['alias'], user_id, bodyData['command'])
         return SuccessResponse(`Snippet '${result.alias}' updated successfully`, { snippet: result })
     }
 }
