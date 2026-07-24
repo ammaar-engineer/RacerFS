@@ -2,8 +2,7 @@ import { Injectable } from "@nestjs/common";
 import { InjectRepository } from "@nestjs/typeorm";
 import { User } from "src/entity";
 import { Repository } from "typeorm";
-import { ConflictException, NotFoundException } from "src/CustomExceptionHandle";
-import { TokenServices } from "./token.services";
+import { TokenServices } from "../global_services/token.services";
 
 @Injectable()
 export class UserServices {
@@ -34,21 +33,6 @@ export class UserServices {
 
     async OtpAction(action: 'login' | 'register', email: string) {
         return action == 'login' ? this.HandleLoginAction(email) : this.HandleRegisterAction(email)
-    }
-
-    async isEmail(action: 'exist' | 'notexist', email: string) {
-        const emailExist = await this.userRepo.findOne({
-            where: {
-                email
-            }
-        })
-        if (action == 'exist' && !emailExist) {
-            throw new NotFoundException("Email not found")
-        }
-        if (action == 'notexist' && emailExist) {
-            throw new ConflictException("Email already exist")
-        }
-        return emailExist
     }
 
     async createNewEmail(email: string) {

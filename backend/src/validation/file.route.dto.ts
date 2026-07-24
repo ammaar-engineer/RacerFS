@@ -18,7 +18,7 @@ export class FileRenameHeaderDTO {
     @IsNotEmpty()
     "access-token"!: string
 }
-export class FileRenameQueryDTO {
+export class FileRenameBodyDTO {
     @IsString()
     @IsNotEmpty()
     "file-name"!: string
@@ -47,22 +47,23 @@ export class FileGetPresignedUploadQueryDTO {
     @IsString()
     @IsNotEmpty()
     "file-name"!: string
+
+    @IsNumberString()
+    @IsNotEmpty()
+    "file-size"!: string
 }
 export class FileGetPresignedUploadHeaderDTO {
     @IsString()
     @IsNotEmpty()
     "authorization"!: string
-
-    @IsNumberString()
-    @IsNotEmpty()
-    "file-size"!: string
 }
 
 export class FileConfirmUploadHeaderDTO {
     @IsString()
     @IsNotEmpty()
     "authorization"!: string
-
+}
+export class FileConfirmUploadBodyDTO {
     @IsNumberString()
     @IsNotEmpty()
     "file-size"!: string
@@ -70,8 +71,7 @@ export class FileConfirmUploadHeaderDTO {
     @IsString()
     @IsNotEmpty()
     "file-key"!: string
-}
-export class FileConfirmUploadQueryDTO {
+
     @IsString()
     @IsNotEmpty()
     @IsIn(["SUCCESS", "FAILED"])
@@ -87,7 +87,7 @@ export class FileDeleteHeadersDTO {
     @IsNotEmpty()
     "authorization"!: string   
 }
-export class FileDeleteQueryDTO {
+export class FileDeleteBodyDTO {
     @IsString()
     @IsNotEmpty()
     "file-name"!: string
@@ -104,7 +104,7 @@ export class FileDeleteAccessTokenHeaderDTO {
     @IsNotEmpty()
     "authorization"!: string
 }
-export class FileDeleteAccessTokenQueryDTO {
+export class FileDeleteAccessTokenBodyDTO {
     @IsString()
     @IsNotEmpty()
     "token"!: string
@@ -115,13 +115,18 @@ export class FileSetVisibilityHeaderDTO {
     @IsNotEmpty()
     "authorization"!: string
 }
-export class FileSetVisibilityQueryDTO {
+export class FileSetVisibilityBodyDTO {
     @IsString()
     @IsNotEmpty()
     "file-name"!: string
-}
-export class FileSetVisibilityBodyDTO {
+
     @IsBoolean()
     @IsNotEmpty()
     "is_public"!: boolean
+}
+
+export class FileStorageInfoHeaderDTO {
+    @IsString()
+    @IsNotEmpty()
+    "authorization"!: string
 }

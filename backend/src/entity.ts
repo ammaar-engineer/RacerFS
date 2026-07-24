@@ -39,13 +39,13 @@ export class User {
   created_at!: Date;
 
   // Relations
-  @OneToMany(() => Snippet, (snippet) => snippet.user, { cascade: true })
+  @OneToMany(() => Snippet, (snippet) => snippet.user, { cascade: true, onDelete: 'CASCADE'})
   snippets!: Snippet[];
 
-  @OneToMany(() => Token, (token) => token.user_id)
+  @OneToMany(() => Token, (token) => token.user_id, {onDelete: 'CASCADE'})
   tokens!: Token[]
 
-  @OneToMany(() => File, (file) => file.user, { cascade: true })
+  @OneToMany(() => File, (file) => file.user, { cascade: true, onDelete: 'CASCADE' })
   files!: File[];
 }
 
