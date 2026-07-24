@@ -1,16 +1,12 @@
-import { Global, Module, Injectable } from "@nestjs/common";
+import { Injectable } from "@nestjs/common";
 import { UnauthorizedException } from "src/CustomExceptionHandle";
-import { JwtService } from "src/global_modules/jwt.module";
+import { JwtService } from "src/global_services/jwt.services";
 
 @Injectable()
-export class TokenServices {
+export class TokenValidations {
     constructor(
         private readonly jwtService: JwtService,
     ) {}
-
-    generateToken(payload: { user_id: number, type: string }): string {
-        return this.jwtService.generateJwt(payload)
-    }
 
     isValidAccountToken(token: string): {user_id: number, type: 'account_token'} {
         const accountTokenValue = this.jwtService.verifyJwt(token)
@@ -29,8 +25,8 @@ export class TokenServices {
     }
 
     async isOwnerAction(
-        account_token: string, 
-        access_token: string, 
+        account_token: string,
+        access_token: string,
         {throwError = false}: {throwError: boolean}
     ) {
         const accountToken = this.isValidAccountToken(account_token)
@@ -45,10 +41,3 @@ export class TokenServices {
         }
     }
 }
-
-@Global()
-@Module({
-    providers: [TokenServices],
-    exports: [TokenServices]
-})
-export class TokenModule {}

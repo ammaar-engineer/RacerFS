@@ -1,9 +1,9 @@
-import { INestApplication, ValidationPipe } from "@nestjs/common"
+import { INestApplication, ValidationPipe } from "@nestjs/common";
 import { ConfigService } from "@nestjs/config";
 import { Test, TestingModule } from "@nestjs/testing";
-import request from 'supertest'
 import { AppModule } from "src/app.module";
 import { CustomGlobalException } from "src/GlobalException";
+import request from 'supertest';
 
 describe("File Workflow - User Journey", () => {
     let app: INestApplication;
@@ -65,7 +65,24 @@ describe("File Workflow - User Journey", () => {
         })
     })
 
-    describe("Step 1: Cek list file (empty state)", () => {
+    describe("Step 1: Cek storage info", () => {
+        it("Berhasil mendapatkan info storage user", async () => {
+            const res = await request(app.getHttpServer())
+                .get("/file/storage-info")
+                .set("authorization", testAccountToken)
+
+            expect(res.status).toBe(200)
+            expect(res.body.success).toBe(true)
+            expect(res.body.message).toBe("Storage info retrieved successfully")
+            expect(typeof res.body.data.total_storage).toBe("number")
+            expect(typeof res.body.data.used_storage).toBe("number")
+            expect(typeof res.body.data.available_storage).toBe("number")
+            expect(res.body.data.total_storage).toBeGreaterThan(0)
+            expect(res.body.data.available_storage).toBe(res.body.data.total_storage - res.body.data.used_storage)
+        })
+    })
+
+    describe("Step 2: Cek list file (empty state)", () => {
         it("List file masih kosong", async () => {
             const res = await request(app.getHttpServer())
                 .get("/file/list")
@@ -80,13 +97,12 @@ describe("File Workflow - User Journey", () => {
         })
     })
 
-    describe("Step 2: Get presigned upload URL", () => {
+    describe("Step 3: Get presigned upload URL", () => {
         it("Berhasil mendapatkan presigned upload URL dan file_key", async () => {
             const res = await request(app.getHttpServer())
-                .get(`/file/upload-url?file-name=${fileName}`)
+                .get(`/file/upload-url?file-name=${fileName}&file-size=${fileSize}`)
                 .set("authorization", testAccountToken)
-                .set("file-size", fileSize)
-
+                
             expect(res.status).toBe(200)
             expect(res.body.success).toBe(true)
             expect(res.body.message).toBe("Upload URL generated successfully")
@@ -102,7 +118,7 @@ describe("File Workflow - User Journey", () => {
         })
     })
 
-    describe("Step 3: Upload mock file ke MinIO via presigned POST", () => {
+    describe("Step 4: Upload mock file ke MinIO via presigned POST", () => {
         it("Berhasil upload file ke MinIO", async () => {
             const form = new FormData()
             for (const [key, value] of Object.entries(formData)) {
@@ -120,13 +136,17 @@ describe("File Workflow - User Journey", () => {
         })
     })
 
-    describe("Step 4: Confirm upload SUCCESS", () => {
+    describe("Step 5: Confirm upload SUCCESS", () => {
         it("Berhasil konfirmasi upload dan file tersimpan", async () => {
             const res = await request(app.getHttpServer())
-                .post(`/file/confirm-upload?status=SUCCESS&file-name=${fileName}`)
+                .post("/file/confirm-upload")
                 .set("authorization", testAccountToken)
-                .set("file-size", fileSize)
-                .set("file-key", fileKey)
+                .send({
+                    status: "SUCCESS",
+                    "file-name": fileName,
+                    "file-size": fileSize,
+                    "file-key": fileKey
+                })
 
             expect(res.status).toBe(201)
             expect(res.body.success).toBe(true)
@@ -134,7 +154,20 @@ describe("File Workflow - User Journey", () => {
         })
     })
 
-    describe("Step 5: Cek list file (verify file ada)", () => {
+    describe("Step 6: Cek storage info (setelah upload)", () => {
+        it("Storage info tetap konsisten setelah upload", async () => {
+            const res = await request(app.getHttpServer())
+                .get("/file/storage-info")
+                .set("authorization", testAccountToken)
+
+            expect(res.status).toBe(200)
+            expect(res.body.success).toBe(true)
+            expect(res.body.data.total_storage).toBeGreaterThan(0)
+            expect(res.body.data.available_storage).toBe(res.body.data.total_storage - res.body.data.used_storage)
+        })
+    })
+
+    describe("Step 7: Cek list file (verify file ada)", () => {
         it("List file berisi 1 file yang sudah diupload", async () => {
             const res = await request(app.getHttpServer())
                 .get("/file/list")
@@ -148,12 +181,12 @@ describe("File Workflow - User Journey", () => {
         })
     })
 
-    describe("Step 6: Set file ke public", () => {
+    describe("Step 8: Set file ke public", () => {
         it("Berhasil set file visibility ke public", async () => {
             const res = await request(app.getHttpServer())
-                .patch(`/file/set-visibility?file-name=${fileName}`)
+                .patch("/file/set-visibility")
                 .set("authorization", testAccountToken)
-                .send({ is_public: true })
+                .send({ "file-name": fileName, is_public: true })
 
             expect(res.status).toBe(200)
             expect(res.body.success).toBe(true)
@@ -161,15 +194,29 @@ describe("File Workflow - User Journey", () => {
         })
     })
 
-    describe("Step 7: Delete file", () => {
+    describe("Step 9: Delete file", () => {
         it("Berhasil delete file", async () => {
             const res = await request(app.getHttpServer())
-                .delete(`/file/delete-file?file-name=${fileName}`)
+                .delete("/file/delete")
                 .set("authorization", testAccountToken)
+                .send({ "file-name": fileName })
 
             expect(res.status).toBe(200)
             expect(res.body.success).toBe(true)
             expect(res.body.message).toBe(`File ${fileName} deleted successfully`)
+        })
+    })
+
+    describe("Step 10: Cek storage info (setelah delete)", () => {
+        it("Storage info tetap konsisten setelah delete", async () => {
+            const res = await request(app.getHttpServer())
+                .get("/file/storage-info")
+                .set("authorization", testAccountToken)
+
+            expect(res.status).toBe(200)
+            expect(res.body.success).toBe(true)
+            expect(res.body.data.total_storage).toBeGreaterThan(0)
+            expect(res.body.data.available_storage).toBe(res.body.data.total_storage - res.body.data.used_storage)
         })
     })
 })

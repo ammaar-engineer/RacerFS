@@ -3,14 +3,20 @@ import { SuccessResponse } from "src/utilities/Success.Response";
 import { UserDeleteAccount, UserLoginDTO, UserRegisterDTO, VerifyOtpDTO } from "src/validation/user.route.dto";
 import { UserServices } from "src/services/user.services";
 import { AuthServices } from "src/services/auth.services";
-import { JwtService } from "src/global_modules/jwt.module";
+import { JwtService } from "src/global_services/jwt.services";
+import { FileServices } from "src/services/file.services";
+import { AuthValidations } from "src/validation/auth.validations";
+import { UserValidations } from "src/validation/user.validations";
 
 @Controller("user")
 export class UserController {
     constructor(
         private readonly userServices: UserServices,
         private readonly authServices: AuthServices,
-        private readonly jwtService: JwtService
+        private readonly fileService: FileServices,
+        private readonly jwtService: JwtService,
+        private readonly authValidations: AuthValidations,
+        private readonly userValidations: UserValidations
     ) {}
 
     @Post('register')
@@ -30,7 +36,7 @@ export class UserController {
     @Post("verify-otp")
     async VerifyOtp(@Body() body: VerifyOtpDTO) {
         const { sessionId, otp: rawOtp } = body;
-        const {email, action} = await this.authServices.verifyOtp(rawOtp, sessionId)
+        const {email, action} = await this.authValidations.verifyOtp(rawOtp, sessionId)
         const {token} = await this.userServices.OtpAction(action, email)
         return SuccessResponse(`${action} successfully`, {token})
     }
@@ -40,8 +46,10 @@ export class UserController {
         @Body() body: UserDeleteAccount
     ) {
         const {email} = body
-        await this.userServices.isEmail('exist', email)
+        const targetUser = await this.userValidations.isEmail('exist', email)
         await this.userServices.deleteUser(email)
+        const fileList = targetUser?.files.map(data => data.file_key)
+        await this.fileService.removeObject(fileList as string[])
         SuccessResponse("Account has been deleted")
     }
 

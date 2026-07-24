@@ -1,14 +1,15 @@
 import { Module } from '@nestjs/common';
-import { AppTypeOrmModule } from './global_modules/typeorm.module';
+import { ConfigModule } from '@nestjs/config';
+import { MinIOModule } from './global_modules/minio.module';
 import { RedisClientModule } from './global_modules/redis.module';
 import { EmailSendModule } from './global_modules/resend.module';
-import { MinIOModule } from './global_modules/minio.module';
-import { JwtModule } from './global_modules/jwt.module';
-import { ConfigModule } from '@nestjs/config';
-import { TokenModule } from './services/token.services';
-import { UserRoutesModule } from './routes/user/module';
+import { AppTypeOrmModule } from './global_modules/typeorm.module';
+import { JwtModule } from './global_services/jwt.services';
+import { TokenModule } from './global_services/token.services';
 import { FileRouteModule } from './routes/file/module';
+import { PaymentRouteModule } from './routes/payments/module';
 import { SnippetRouteModule } from './routes/snippet/module';
+import { UserRoutesModule } from './routes/user/module';
 
 @Module({
   imports: [
@@ -23,7 +24,8 @@ import { SnippetRouteModule } from './routes/snippet/module';
     TokenModule,
     UserRoutesModule,
     FileRouteModule,
-    SnippetRouteModule
+    SnippetRouteModule,
+    PaymentRouteModule
   ],
   controllers: [],
   providers: [],

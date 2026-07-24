@@ -3,12 +3,12 @@ import { SuccessResponse } from "src/utilities/Success.Response";
 import { DtoUtilites } from "src/utilities/custom.dto.validator";
 import { SnippetListHeaderDTO, SnippetCreateHeaderDTO, SnippetCreateBodyDTO, SnippetDeleteHeaderDTO, SnippetDeleteQueryDTO, SnippetEditHeaderDTO, SnippetEditQueryDTO, SnippetEditBodyDTO } from "src/validation/snippet.route.dto";
 import { SnippetServices } from "src/services/snippet.services";
-import { TokenServices } from "src/services/token.services";
+import { TokenValidations } from "src/validation/token.validations";
 
 @Controller("snippet")
 export class SnippetRouteController {
     constructor(
-        private readonly tokenServices: TokenServices,
+        private readonly tokenValidations: TokenValidations,
         private readonly dtoUtilites: DtoUtilites,
         private readonly snippetServices: SnippetServices,
     ) {}
@@ -18,7 +18,7 @@ export class SnippetRouteController {
         @Headers() headers: Record<string, string>
     ) {
         const headerData = await this.dtoUtilites.validateSourceDTO(SnippetListHeaderDTO, headers)
-        const { user_id } = this.tokenServices.isValidAccountToken(headerData['authorization'])
+        const { user_id } = this.tokenValidations.isValidAccountToken(headerData['authorization'])
         const snippets = await this.snippetServices.getSnippetList(user_id)
         return SuccessResponse("Snippet list retrieved successfully", { snippets })
     }
@@ -30,7 +30,7 @@ export class SnippetRouteController {
     ) {
         const headerData = await this.dtoUtilites.validateSourceDTO(SnippetCreateHeaderDTO, headers)
         const bodyData = await this.dtoUtilites.validateSourceDTO(SnippetCreateBodyDTO, body)
-        const { user_id } = this.tokenServices.isValidAccountToken(headerData['authorization'])
+        const { user_id } = this.tokenValidations.isValidAccountToken(headerData['authorization'])
         const snippet = await this.snippetServices.createSnippet({
             alias: bodyData['alias'],
             description: bodyData['description'],
@@ -55,7 +55,7 @@ export class SnippetRouteController {
     ) {
         const headerData = await this.dtoUtilites.validateSourceDTO(SnippetDeleteHeaderDTO, headers)
         const queryData = await this.dtoUtilites.validateSourceDTO(SnippetDeleteQueryDTO, query)
-        const { user_id } = this.tokenServices.isValidAccountToken(headerData['authorization'])
+        const { user_id } = this.tokenValidations.isValidAccountToken(headerData['authorization'])
         await this.snippetServices.deleteSnippet(queryData['alias'], user_id)
         return SuccessResponse(`Snippet '${queryData['alias']}' deleted successfully`)
     }
@@ -69,7 +69,7 @@ export class SnippetRouteController {
         const headerData = await this.dtoUtilites.validateSourceDTO(SnippetEditHeaderDTO, headers)
         const queryData = await this.dtoUtilites.validateSourceDTO(SnippetEditQueryDTO, query)
         const bodyData = await this.dtoUtilites.validateSourceDTO(SnippetEditBodyDTO, body)
-        const { user_id } = this.tokenServices.isValidAccountToken(headerData['authorization'])
+        const { user_id } = this.tokenValidations.isValidAccountToken(headerData['authorization'])
         const result = await this.snippetServices.updateSnippet(queryData['alias'], user_id, bodyData['command'])
         return SuccessResponse(`Snippet '${result.alias}' updated successfully`, { snippet: result })
     }

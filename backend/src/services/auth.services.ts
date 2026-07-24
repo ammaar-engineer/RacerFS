@@ -1,19 +1,17 @@
 import { Inject, Injectable } from "@nestjs/common";
 import { createClient } from "redis";
-import { NotFoundException, UnauthorizedException } from "src/CustomExceptionHandle";
 import { REDIS_CLIENT } from "src/global_modules/redis.module";
 import crypto from 'crypto'
 import { otpGen } from "otp-gen-agent";
-import { UserServices } from "./user.services";
+import { UserValidations } from "src/validation/user.validations";
 
 @Injectable()
 export class AuthServices {
     constructor(
         @Inject(REDIS_CLIENT) private readonly redisService: ReturnType<typeof createClient>,
-        private readonly userServices: UserServices
+        private readonly userValidations: UserValidations
     ) {}
 
-    // Session management methods
     async setAuthSession(email: string, action: 'login' | 'register') {
         const sessionId = crypto.randomUUID()
         const otp = await otpGen()
@@ -25,36 +23,14 @@ export class AuthServices {
         return {sessionId}
     }
 
-    async findAuthSession(sessionId: string): Promise<{email: string, otp: string, action: 'login' | 'register'}> {
-        const sessionData = await this.redisService.get(`${sessionId}:auth`) as string
-        if (!sessionData) {
-            throw new NotFoundException("Session not found")
-        }
-        return JSON.parse(sessionData)
-    }
-
-    async deleteAuthSession(sessionId: string) {
-        await this.redisService.del(`${sessionId}:auth`)
-        return {sessionId}
-    }
-
-    async verifyOtp(otp: string, sessionId: string) {
-        const {otp: realOtp, email, action} = await this.findAuthSession(sessionId)
-        if (otp !== realOtp) {
-            throw new UnauthorizedException("Wrong OTP code")
-        }
-        await this.deleteAuthSession(sessionId)
-        return {email, action}
-    }
-
     async createRegisterSession(email: string) {
-        await this.userServices.isEmail('notexist' ,email)
+        await this.userValidations.isEmail('notexist', email)
         const {sessionId} = await this.setAuthSession(email, 'register')
         return {sessionId}
     }
 
     async createLoginSession(email: string) {
-        await this.userServices.isEmail('exist', email)
+        await this.userValidations.isEmail('exist', email)
         const {sessionId} = await this.setAuthSession(email, 'login')
         return {sessionId}
     }
