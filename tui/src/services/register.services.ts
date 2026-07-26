@@ -11,6 +11,7 @@ export class registerServicesClass {
                 sessionId: resSendActionReq.data.data.sessionId
             }
         } catch (error) {
+            console.log(error)
             console.log("Error while sending register request")
             process.exit(1)
         }

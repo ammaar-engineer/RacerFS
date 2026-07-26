@@ -1,12 +1,13 @@
 import { serviceSystem } from "@/services/fs.services";
 import { registerServicesClass } from "@/services/register.services";
 import { RACERFS_FOLDER_PATH } from "@/SYSTEM-PATH";
-import { text } from "@clack/prompts";
+import { box, text } from "@clack/prompts";
 import chalk from "chalk";
 
 export async function registerComponent() {
     const registerServices = new registerServicesClass()
 
+    box("Welcome to RacerFS TUI Menu", "Menu")
     const email = await text({
         message: "Enter your email",
         placeholder: "amarix@gmail.com"

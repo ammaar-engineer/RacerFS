@@ -1,8 +1,8 @@
 import { Body, Controller, Delete, Get, Headers, Patch, Post, Query } from "@nestjs/common";
+import { SnippetServices } from "src/services/snippet.services";
 import { SuccessResponse } from "src/utilities/Success.Response";
 import { DtoUtilites } from "src/utilities/custom.dto.validator";
-import { SnippetListHeaderDTO, SnippetCreateHeaderDTO, SnippetCreateBodyDTO, SnippetDeleteHeaderDTO, SnippetDeleteQueryDTO, SnippetEditHeaderDTO, SnippetEditQueryDTO, SnippetEditBodyDTO } from "src/validation/snippet.route.dto";
-import { SnippetServices } from "src/services/snippet.services";
+import { SnippetCreateBodyDTO, SnippetCreateHeaderDTO, SnippetDeleteHeaderDTO, SnippetDeleteQueryDTO, SnippetEditBodyDTO, SnippetEditHeaderDTO, SnippetEditQueryDTO, SnippetListHeaderDTO } from "src/validation/snippet.route.dto";
 import { TokenValidations } from "src/validation/token.validations";
 
 @Controller("snippet")
@@ -17,7 +17,9 @@ export class SnippetRouteController {
     async getSnippetList(
         @Headers() headers: Record<string, string>
     ) {
+        console.log("tembak", headers['authorization'])
         const headerData = await this.dtoUtilites.validateSourceDTO(SnippetListHeaderDTO, headers)
+        console.log(headerData)
         const { user_id } = this.tokenValidations.isValidAccountToken(headerData['authorization'])
         const snippets = await this.snippetServices.getSnippetList(user_id)
         return SuccessResponse("Snippet list retrieved successfully", { snippets })

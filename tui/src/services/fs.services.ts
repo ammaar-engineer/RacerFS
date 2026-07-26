@@ -9,11 +9,11 @@ export class ServicesClass {
         fs.unlinkSync(path)
     }
     readFile(path: string, {isJson}: {isJson: boolean}) {
-        return isJson ? JSON.parse(fs.readFileSync(path, 'utf8')) : fs.readFileSync(path, 'utf8')
+        return isJson ? JSON.parse(fs.readFileSync(path, 'utf8')) : fs.readFileSync(path).toString()
     }
     modifyJsonFile(path: string, newData: any) {
         const prevData = this.readFile(path, {isJson: true})
-        this.createFile(path, JSON.stringify({...prevData, ...newData}, null, 2), {isJson: true})
+        this.createFile(path, {...prevData, ...newData}, {isJson: true})
     }
 
     createFolder(path: string) {

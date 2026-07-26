@@ -4,7 +4,7 @@
   "description": "",
   "main": "main.ts",
   "scripts": {
-    "dev": "node ./node_modules/typescript/bin/tsc -w"
+    "dev": "npx tsx src/main.ts"
   },
   "keywords": [],
   "author": "",
