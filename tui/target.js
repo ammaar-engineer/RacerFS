@@ -1,5 +1,3 @@
-const amar = "nama"
+let names = "amar:9"
 
-
-function panggil() {
-}
+console.log(names.split(':'))

@@ -17,9 +17,7 @@ export class SnippetRouteController {
     async getSnippetList(
         @Headers() headers: Record<string, string>
     ) {
-        console.log("tembak", headers['authorization'])
         const headerData = await this.dtoUtilites.validateSourceDTO(SnippetListHeaderDTO, headers)
-        console.log(headerData)
         const { user_id } = this.tokenValidations.isValidAccountToken(headerData['authorization'])
         const snippets = await this.snippetServices.getSnippetList(user_id)
         return SuccessResponse("Snippet list retrieved successfully", { snippets })

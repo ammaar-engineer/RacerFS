@@ -30,6 +30,11 @@ export class CustomGlobalException extends BaseExceptionFilter {
     // console.error('Stack:', exception?.stack)
     // console.error('========================')
     if (isDevelopment) {
+      ServerOutput['debug'] = {
+        originalMessage: exception?.message ?? String(exception),
+        stack: exception?.stack,
+        exceptionType: exception?.constructor?.name ?? typeof exception,
+      }
     }
 
     if (exception instanceof BaseException) {

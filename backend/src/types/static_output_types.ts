@@ -4,4 +4,9 @@ export interface static_output_types<dataschema = {}> {
   statusCode?: number;
   errorCode?: string;
   success?: boolean;
+  debug?: {
+    originalMessage: string;
+    stack?: string;
+    exceptionType: string;
+  };
 }

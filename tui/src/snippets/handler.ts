@@ -1,4 +1,4 @@
-import { select } from "@clack/prompts"
+import { createSelectOption } from "@/main_components/select.option"
 import { listSnippets } from "./list"
 import { createSnippet } from "./create"
 import { editSnippet } from "./edit"
@@ -13,28 +13,38 @@ export async function SnippetsHandler() {
     return
   }
 
-  const selected = await select({
-    message: "Snippet Management",
-    options: [
-      { value: 'list', label: 'View all snippets', hint: "See your saved snippets" },
-      { value: 'create', label: 'Create new snippet', hint: "Add a new command snippet" },
-      { value: 'edit', label: 'Edit snippet', hint: "Update existing snippet command" },
-      { value: 'delete', label: 'Delete snippet', hint: "Remove a snippet" },
-      { value: 'back', label: 'Back to main menu', hint: "Return to main menu" }
-    ]
-  })
-
-  const options: Record<string, () => Promise<void>> = {
-    'list': listSnippets,
-    'create': createSnippet,
-    'edit': editSnippet,
-    'delete': deleteSnippet,
-    'back': async () => {} // Do nothing, returns to main
-  }
-
-  if (selected !== 'back') {
-    await options[selected as string]()
-    // After action, return to snippet menu
-    await SnippetsHandler()
-  }
+  await createSelectOption("Snippet Management", [
+    { 
+      label: 'View all snippets', 
+      action: async () => {
+        await listSnippets()
+        await SnippetsHandler()
+      }
+    },
+    { 
+      label: 'Create new snippet', 
+      action: async () => {
+        await createSnippet()
+        await SnippetsHandler()
+      }
+    },
+    { 
+      label: 'Edit snippet', 
+      action: async () => {
+        await editSnippet()
+        await SnippetsHandler()
+      }
+    },
+    { 
+      label: 'Delete snippet', 
+      action: async () => {
+        await deleteSnippet()
+        await SnippetsHandler()
+      }
+    },
+    { 
+      label: 'Back to main menu', 
+      action: async () => {} // Do nothing, returns to main
+    }
+  ])
 }

@@ -1,23 +1,24 @@
-import { box, select } from '@clack/prompts';
+import { box } from '@clack/prompts';
 import 'dotenv/config';
+import { createSelectOption } from './main_components/select.option';
 import { LoginOrRegisterHandler } from './loginorregister/handler';
-import { SnippetsHandler } from './snippets/handler';
 import { InitRacerFS } from "./main_components/init.system.js";
+import { SnippetsHandler } from './snippets/handler';
+import { FilesHandler } from './files/handler';
+import { paymentsHandler } from './payments/handler';
+import { testingHandler } from './testing/handler';
 
 InitRacerFS()
 box("Welcome to RacerFS TUI Menu", "Menu")
-const selectedOption = await select({
-    message: "What you will do?",
-    options: [
-        {value: 'login/register', label: 'Login/Register', hint: "For authentication"},
-        {value: 'manage-snippets', label: 'Manage snippets', hint: "Take action of your snippets"},
-        {value: 'manage-files', label: "Manage files", hint: "Take action of your files"},
-        {value: 'manage-ai', label: 'use AI Mode', hint: "Use your AI"}
-    ]
-})
-const options = {
-    'login/register': LoginOrRegisterHandler,
-    'manage-snippets': SnippetsHandler
+
+while(true) {
+    await createSelectOption("What you will do?", [
+        { label: 'Login/Register', action: LoginOrRegisterHandler },
+        { label: 'Manage snippets', action: SnippetsHandler },
+        { label: 'Manage files', action: FilesHandler },
+        { label: 'Storage Management', action: paymentsHandler },
+        { label: 'Use AI Mode', action: async () => console.log("AI Mode - Coming soon") },
+        { label: 'Testing', action: testingHandler },
+        { label: 'Exit', action: async () => process.exit(0) }
+    ])
 }
-await (options as any)[selectedOption]()
-// registerComponent()

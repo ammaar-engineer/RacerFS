@@ -6,5 +6,7 @@ backend/.env/
 tui/.env/
 tui/node_modules/
 
+frontend/node_modules/
+
 test_area/.env
 test_area/node_modules

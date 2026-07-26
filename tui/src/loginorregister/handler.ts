@@ -1,18 +1,26 @@
-import { select } from "@clack/prompts";
+import { createSelectOption } from "@/main_components/select.option";
 import { loginComponent } from "./login";
 import { registerComponent } from "./register";
 
 export async function LoginOrRegisterHandler() {
-    const selected = await select({
-    message: "What you will do?",
-    options: [
-        {value: 'login', label: 'Login to RacerFS', hint: "Login now"},
-        {value: 'register', label: 'Register to RacerFS', hint: "Register now"}        
-    ]
-})
-    const options = {
-        'login': loginComponent,
-        'register': registerComponent
-    }
-    await (options as any)[selected]()
+    await createSelectOption("What you will do?", [
+        { 
+            label: 'Login to RacerFS', 
+            action: async () => {
+                await loginComponent()
+                await LoginOrRegisterHandler()
+            }
+        },
+        { 
+            label: 'Register to RacerFS', 
+            action: async () => {
+                await registerComponent()
+                await LoginOrRegisterHandler()
+            }
+        },
+        { 
+            label: 'Back to main menu', 
+            action: async () => {} // Do nothing, returns to main
+        }
+    ])
 }
