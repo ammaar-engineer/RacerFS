@@ -20,7 +20,6 @@ export class FileRouteController {
     async getFileList(
         @Headers() headers: Record<string, string>,
     ) {
-        console.log("[GET /file/list] hit")
         const headerData = await this.dtoUtilites.validateSourceDTO(FileListHeaderDTO, headers)
         await this.fileValidations.AccessTokenShouldBe("exist", headerData['access-token'])
         const {isOwner, accountToken_user_id} = await this.tokenValidations.isOwnerAction(
@@ -40,7 +39,6 @@ export class FileRouteController {
         @Headers() headers: Record<string, string>,
         @Query() query: Record<string, string>,
     ) {
-        console.log("[GET /file/download-url] hit")
         const headerData = await this.dtoUtilites.validateSourceDTO(FileDownloadHeaderDTO, headers)
         const queryData = await this.dtoUtilites.validateSourceDTO(FileDownloadQueryDTO, query)
         const { accountToken_user_id } = await this.tokenValidations.isOwnerAction(
@@ -61,7 +59,6 @@ export class FileRouteController {
         @Headers() headers: Record<string, string>,
         @Body() body: Record<string, string>,
     ) {
-        console.log("[PATCH /file/rename] hit")
         const headerData = await this.dtoUtilites.validateSourceDTO(FileRenameHeaderDTO, headers)
         const bodyData = await this.dtoUtilites.validateSourceDTO(FileRenameBodyDTO, body)
         const { accountToken_user_id } = await this.tokenValidations.isOwnerAction(
@@ -82,7 +79,6 @@ export class FileRouteController {
         @Headers() headers: Record<string, string>,
         @Query() query: Record<string, string>,
     ) {
-        console.log("[GET /file/get-presigned-upload-url] hit")
         const headerData = await this.dtoUtilites.validateSourceDTO(FileGetPresignedUploadHeaderDTO, headers)
         const queryData = await this.dtoUtilites.validateSourceDTO(FileGetPresignedUploadQueryDTO, query)
         const { user_id } = this.tokenValidations.isValidAccountToken(headerData['authorization'])
@@ -101,7 +97,6 @@ export class FileRouteController {
         @Headers() headers: Record<string, string>,
         @Body() body: Record<string, string>,
     ) {
-        console.log("[POST /file/confirm-upload] hit")
         const headerData = await this.dtoUtilites.validateSourceDTO(FileConfirmUploadHeaderDTO, headers)
         const bodyData = await this.dtoUtilites.validateSourceDTO(FileConfirmUploadBodyDTO, body)
         const { user_id } = this.tokenValidations.isValidAccountToken(headerData['authorization'])
@@ -119,7 +114,6 @@ export class FileRouteController {
     async generateAccessToken(
         @Headers() headers: Record<string, string>,
     ) {
-        console.log("[POST /file/generate-access-token] hit")
         const headerData = await this.dtoUtilites.validateSourceDTO(FileGenerateAccessTokenHeaderDTO, headers)
         const { user_id } = this.tokenValidations.isValidAccountToken(headerData['authorization'])
         const token = await this.tokenServices.generateAccessToken(user_id)
@@ -132,7 +126,6 @@ export class FileRouteController {
         @Headers() headers: Record<string, string>,
         @Body() body: Record<string, string>,
     ) {
-        console.log("[DELETE /file/delete-access-token] hit")
         const headerData = await this.dtoUtilites.validateSourceDTO(FileDeleteAccessTokenHeaderDTO, headers)
         const bodyData = await this.dtoUtilites.validateSourceDTO(FileDeleteAccessTokenBodyDTO, body)
         const { user_id } = this.tokenValidations.isValidAccountToken(headerData['authorization'])
@@ -145,7 +138,6 @@ export class FileRouteController {
         @Headers() headers: Record<string, string>,
         @Body() body: Record<string, string>,
     ) {
-        console.log("[DELETE /file/delete] hit")
         const headerData = await this.dtoUtilites.validateSourceDTO(FileDeleteHeadersDTO, headers)
         const bodyData = await this.dtoUtilites.validateSourceDTO(FileDeleteBodyDTO, body)
         const { user_id } = this.tokenValidations.isValidAccountToken(headerData['authorization'])
@@ -163,7 +155,6 @@ export class FileRouteController {
         @Headers() headers: Record<string, string>,
         @Body() body: Record<string, any>
     ) {
-        console.log("[PATCH /file/set-visibility] hit")
         const headerData = await this.dtoUtilites.validateSourceDTO(FileSetVisibilityHeaderDTO, headers)
         const bodyData = await this.dtoUtilites.validateSourceDTO(FileSetVisibilityBodyDTO, body)
         const {user_id} = this.tokenValidations.isValidAccountToken(headerData['authorization'])
@@ -182,7 +173,6 @@ export class FileRouteController {
     async getStorageInfo(
         @Headers() headers: Record<string, string>,
     ) {
-        console.log("[GET /file/storage-info] hit")
         const headerData = await this.dtoUtilites.validateSourceDTO(FileStorageInfoHeaderDTO, headers)
         const { user_id } = this.tokenValidations.isValidAccountToken(headerData['authorization'])
         const data = await this.fileServices.getStorageInfo(user_id)

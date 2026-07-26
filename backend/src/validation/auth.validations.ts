@@ -10,7 +10,7 @@ export class AuthValidations {
     ) {}
 
     private async findAuthSession(sessionId: string): Promise<{email: string, otp: string, action: 'login' | 'register'}> {
-        const sessionData = await this.redisService.get(`${sessionId}:auth`) as string
+        const sessionData = await this.redisService.get(`auth:${sessionId}`) as string
         if (!sessionData) {
             throw new NotFoundException("Session not found")
         }

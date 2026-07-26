@@ -30,6 +30,7 @@
     "class-transformer": "^0.5.1",
     "class-validator": "^0.15.1",
     "jsonwebtoken": "^9.0.3",
+    "midtrans-client": "^1.4.3",
     "minio": "^8.0.7",
     "otp-gen-agent": "^2.0.1",
     "pg": "^8.22.0",

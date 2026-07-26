@@ -1,11 +1,11 @@
-import { Body, Controller, Delete, Get, Post } from "@nestjs/common";
-import { SuccessResponse } from "src/utilities/Success.Response";
-import { UserDeleteAccount, UserLoginDTO, UserRegisterDTO, VerifyOtpDTO } from "src/validation/user.route.dto";
-import { UserServices } from "src/services/user.services";
-import { AuthServices } from "src/services/auth.services";
+import { Body, Controller, Delete, Get, Headers, Post } from "@nestjs/common";
 import { JwtService } from "src/global_services/jwt.services";
+import { AuthServices } from "src/services/auth.services";
 import { FileServices } from "src/services/file.services";
+import { UserServices } from "src/services/user.services";
+import { SuccessResponse } from "src/utilities/Success.Response";
 import { AuthValidations } from "src/validation/auth.validations";
+import { UserDeleteAccount, UserLoginDTO, UserRegisterDTO, VerifyOtpDTO } from "src/validation/user.route.dto";
 import { UserValidations } from "src/validation/user.validations";
 
 @Controller("user")
@@ -23,6 +23,7 @@ export class UserController {
     async UserRegister(@Body() body: UserRegisterDTO) {
         const {email} = body
         const {sessionId} = await this.authServices.createRegisterSession(email)
+        console.log(sessionId)
         return SuccessResponse("OTP Has been sent to your email", { sessionId })
     }
 
@@ -54,8 +55,10 @@ export class UserController {
     }
 
     @Get("create-test-account")
-    async createTestAccount() {
-        const createEmail = await this.userServices.createNewEmail("ammaar@gmail.com")
+    async createTestAccount(
+        @Headers() headers: Record<string, string>
+    ) {
+        const createEmail = await this.userServices.createNewEmail(headers['account-test'])
         const token = this.jwtService.generateJwt({
             user_id: createEmail.id,
             type: "account_token"

@@ -40,6 +40,7 @@ describe("File Workflow - User Journey", () => {
         it("Berhasil membuat test account dan mendapatkan token", async () => {
             const res = await request(app.getHttpServer())
                 .get("/user/create-test-account")
+                .set("account-test", "emailfiletest@gmail.com")
 
             expect(res.status).toBe(200)
             expect(res.body.success).toBe(true)
@@ -54,13 +55,11 @@ describe("File Workflow - User Journey", () => {
             const res = await request(app.getHttpServer())
                 .post("/file/generate-access-token")
                 .set("authorization", testAccountToken)
-            console.log("SUKSES")
             expect(res.status).toBe(201)
             expect(res.body.success).toBe(true)
             expect(res.body.message).toBe("Access token generated successfully")
             expect(typeof res.body.data.access_token).toBe("string")
             expect(res.body.data.access_token.length).toBeGreaterThan(0)
-            console.log("AKSES TOKEN", res.body.data)
             accessToken = res.body.data.access_token
         })
     })
@@ -111,7 +110,6 @@ describe("File Workflow - User Journey", () => {
             expect(typeof res.body.data.formData).toBe("object")
             expect(typeof res.body.data.file_key).toBe("string")
             expect(res.body.data.file_key.length).toBeGreaterThan(0)
-            console.log(res.body.data)
             presignedUrl = res.body.data.url
             formData = res.body.data.formData
             fileKey = res.body.data.file_key
@@ -130,7 +128,6 @@ describe("File Workflow - User Journey", () => {
                 method: "POST",
                 body: form
             })
-            console.log("ERROR STEP 3: ", res)
 
             expect(res.status).toBe(204)
         })
