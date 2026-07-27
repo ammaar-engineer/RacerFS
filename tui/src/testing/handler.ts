@@ -1,9 +1,9 @@
-import { createSelectOption } from "@/main_components/select.option"
-import { testingServices } from "@/services/testing.services"
-import { serviceSystem } from "@/services/fs.services"
-import { RACERFS_FOLDER_PATH } from "@/SYSTEM-PATH"
 import { text } from "@clack/prompts"
 import chalk from "chalk"
+import { createSelectOption } from "../main_components/select.option"
+import { serviceSystem } from "../services/fs.services"
+import { testingServices } from "../services/testing.services"
+import { RACERFS_FOLDER_PATH } from "../SYSTEM-PATH"
 
 export async function testingHandler() {
     await createSelectOption("Testing Menu", [
@@ -17,7 +17,6 @@ export async function testingHandler() {
 
                 if (!accountName || accountName.trim().length === 0) {
                     console.log(chalk.red("\nAccount name cannot be empty\n"))
-                    await testingHandler()
                     return
                 }
 
@@ -33,7 +32,6 @@ export async function testingHandler() {
                 
                 console.log(chalk.green(`\n✓ Test account created successfully!`))
                 console.log(chalk.dim(`Account: ${accountName}\n`))
-                await testingHandler()
             }
         },
         {

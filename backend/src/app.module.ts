@@ -10,7 +10,6 @@ import { FileRouteModule } from './routes/file/module';
 import { PaymentRouteModule } from './routes/payments/module';
 import { SnippetRouteModule } from './routes/snippet/module';
 import { UserRoutesModule } from './routes/user/module';
-
 @Module({
   imports: [
     ConfigModule.forRoot({
@@ -30,4 +29,4 @@ import { UserRoutesModule } from './routes/user/module';
   controllers: [],
   providers: [],
 })
-export class AppModule {}
+export class AppModule { }

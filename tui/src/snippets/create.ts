@@ -1,5 +1,5 @@
-import { snippetServices } from "@/services/snippet.services"
-import { snippetValidation } from "@/validations/snippet.validation"
+import { snippetServices } from "../services/snippet.services"
+import { snippetValidation } from "../validations/snippet.validation"
 import { box, text } from "@clack/prompts"
 import chalk from "chalk"
 

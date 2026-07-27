@@ -1,5 +1,5 @@
-import { RACERFS_FOLDER_PATH } from "@/SYSTEM-PATH"
-import { serviceSystem } from "@/services/fs.services"
+import { RACERFS_FOLDER_PATH } from "../SYSTEM-PATH"
+import { serviceSystem } from "../services/fs.services"
 import { validationSystem } from "./fs.validation"
 
 class SnippetValidationClass {

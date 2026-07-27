@@ -1,10 +1,10 @@
-import { createSelectOption } from "@/main_components/select.option"
-import { listSnippets } from "./list"
-import { createSnippet } from "./create"
-import { editSnippet } from "./edit"
-import { deleteSnippet } from "./delete"
-import { snippetValidation } from "@/validations/snippet.validation"
 import chalk from "chalk"
+import { createSelectOption } from "../main_components/select.option"
+import { snippetValidation } from "../validations/snippet.validation"
+import { createSnippet } from "./create"
+import { deleteSnippet } from "./delete"
+import { editSnippet } from "./edit"
+import { listSnippets } from "./list"
 
 export async function SnippetsHandler() {
   // Check authentication first
@@ -18,28 +18,24 @@ export async function SnippetsHandler() {
       label: 'View all snippets', 
       action: async () => {
         await listSnippets()
-        await SnippetsHandler()
       }
     },
     { 
       label: 'Create new snippet', 
       action: async () => {
         await createSnippet()
-        await SnippetsHandler()
       }
     },
     { 
       label: 'Edit snippet', 
       action: async () => {
         await editSnippet()
-        await SnippetsHandler()
       }
     },
     { 
       label: 'Delete snippet', 
       action: async () => {
         await deleteSnippet()
-        await SnippetsHandler()
       }
     },
     { 

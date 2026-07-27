@@ -6,46 +6,52 @@ import {
   ManyToOne,
   OneToMany,
   JoinColumn,
-} from "typeorm";
+} from 'typeorm';
 
 export enum TokenType {
-  "file_access_token" = "file_access_token",
-  "account_token"="account_token"
+  file_access_token = 'file_access_token',
+  account_token = 'account_token',
 }
 
-@Entity("User")
+@Entity('User')
 export class User {
   @PrimaryGeneratedColumn()
   id!: number;
 
-  @Column({ type: "varchar", length: 40, unique: true })
+  @Column({ type: 'varchar', length: 40, unique: true })
   email!: string;
 
   @Column({
-    type: 'bigint', 
-    nullable: false, 
-    default: 104857600
+    type: 'bigint',
+    nullable: false,
+    default: 104857600,
   })
-  storage_size!: number
+  storage_size!: number;
 
   @Column({
-    type: 'bigint', 
+    type: 'bigint',
     nullable: false,
-    default: 0
+    default: 0,
   })
-  used_storage!: number
+  used_storage!: number;
 
-  @CreateDateColumn({ type: "timestamp with time zone" })
+  @CreateDateColumn({ type: 'timestamp with time zone' })
   created_at!: Date;
 
   // Relations
-  @OneToMany(() => Snippet, (snippet) => snippet.user, { cascade: true, onDelete: 'CASCADE'})
+  @OneToMany(() => Snippet, (snippet) => snippet.user, {
+    cascade: true,
+    onDelete: 'CASCADE',
+  })
   snippets!: Snippet[];
 
-  @OneToMany(() => Token, (token) => token.user_id, {onDelete: 'CASCADE'})
-  tokens!: Token[]
+  @OneToMany(() => Token, (token) => token.user_id, { onDelete: 'CASCADE' })
+  tokens!: Token[];
 
-  @OneToMany(() => File, (file) => file.user, { cascade: true, onDelete: 'CASCADE' })
+  @OneToMany(() => File, (file) => file.user, {
+    cascade: true,
+    onDelete: 'CASCADE',
+  })
   files!: File[];
 }
 
@@ -71,55 +77,55 @@ export class Token {
   user!: User;
 }
 
-@Entity("Snippet")
+@Entity('Snippet')
 export class Snippet {
   @PrimaryGeneratedColumn()
   id!: number;
 
-  @Column({ type: "varchar", length: 255 })
+  @Column({ type: 'varchar', length: 255 })
   alias!: string;
 
-  @Column({ type: "text", nullable: true })
+  @Column({ type: 'text', nullable: true })
   description!: string | null;
 
-  @Column({ type: "text" })
+  @Column({ type: 'text' })
   command!: string;
 
-  @Column({ type: "int" })
+  @Column({ type: 'int' })
   user_id!: number;
 
-  @CreateDateColumn({ type: "timestamp with time zone" })
+  @CreateDateColumn({ type: 'timestamp with time zone' })
   created_at!: Date;
 
-  @ManyToOne(() => User, (user) => user.snippets, { onDelete: "CASCADE" })
-  @JoinColumn({ name: "user_id" })
+  @ManyToOne(() => User, (user) => user.snippets, { onDelete: 'CASCADE' })
+  @JoinColumn({ name: 'user_id' })
   user!: User;
 }
 
-@Entity("File")
+@Entity('File')
 export class File {
   @PrimaryGeneratedColumn()
   id!: number;
 
-  @Column({ type: "varchar", length: 255 })
+  @Column({ type: 'varchar', length: 255 })
   name!: string;
 
-  @Column({ type: "bigint" })
+  @Column({ type: 'bigint' })
   size!: number;
 
-  @Column({type: 'boolean', default: false})
-  is_public!: boolean
+  @Column({ type: 'boolean', default: false })
+  is_public!: boolean;
 
-  @Column({type: 'varchar', length: 50})
-  file_key!: string
+  @Column({ type: 'varchar', length: 50 })
+  file_key!: string;
 
-  @CreateDateColumn({ type: "timestamp with time zone" })
+  @CreateDateColumn({ type: 'timestamp with time zone' })
   uploaded_at!: Date;
 
-  @Column({ type: "int" })
+  @Column({ type: 'int' })
   user_id!: number;
 
-  @ManyToOne(() => User, (user) => user.files, { onDelete: "CASCADE" })
-  @JoinColumn({ name: "user_id" })
+  @ManyToOne(() => User, (user) => user.files, { onDelete: 'CASCADE' })
+  @JoinColumn({ name: 'user_id' })
   user!: User;
 }

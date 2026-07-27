@@ -1,4 +1,4 @@
-import { createSelectOption } from "@/main_components/select.option";
+import { createSelectOption } from "../main_components/select.option";
 import { loginComponent } from "./login";
 import { registerComponent } from "./register";
 
@@ -8,14 +8,12 @@ export async function LoginOrRegisterHandler() {
             label: 'Login to RacerFS', 
             action: async () => {
                 await loginComponent()
-                await LoginOrRegisterHandler()
             }
         },
         { 
             label: 'Register to RacerFS', 
             action: async () => {
                 await registerComponent()
-                await LoginOrRegisterHandler()
             }
         },
         { 

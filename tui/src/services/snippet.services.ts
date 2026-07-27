@@ -1,4 +1,4 @@
-import { BACKEND_URL, RACERFS_FOLDER_PATH } from "@/SYSTEM-PATH"
+import { BACKEND_URL, RACERFS_FOLDER_PATH } from "../SYSTEM-PATH"
 import axios from "axios"
 import chalk from "chalk"
 import { serviceSystem } from "./fs.services"

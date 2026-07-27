@@ -1,4 +1,4 @@
-import { select } from "@clack/prompts"
+import { isCancel, select } from "@clack/prompts"
 
 interface paramObject {
     label: string,
@@ -13,6 +13,10 @@ export async function createSelectOption(title: string, obj: paramObject[]) {
             label: data.label
         }))
     })
+    if (isCancel(selectOption)) {
+        console.log("Exist forcefully")
+        process.exit(0)
+    }
     const selectedOptionIndex = selectOption.toString().split(":")[1]
     await obj[Number(selectedOptionIndex)]?.action()
 }

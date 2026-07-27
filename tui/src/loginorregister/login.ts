@@ -1,6 +1,6 @@
-import { serviceSystem } from "@/services/fs.services";
-import { loginServicesClass } from "@/services/login.services";
-import { RACERFS_FOLDER_PATH } from "@/SYSTEM-PATH";
+import { serviceSystem } from "../services/fs.services";
+import { loginServicesClass } from "../services/login.services";
+import { RACERFS_FOLDER_PATH } from "../SYSTEM-PATH";
 import { text } from "@clack/prompts";
 import chalk from "chalk";
 

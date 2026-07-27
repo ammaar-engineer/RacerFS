@@ -1,7 +1,9 @@
-import { RACERFS_FOLDER_PATH } from "@/SYSTEM-PATH"
-import { serviceSystem } from "@/services/fs.services"
-import { fileServices } from "@/services/file.services"
+import { serviceSystem } from "../services/fs.services"
+import { RACERFS_FOLDER_PATH } from "../SYSTEM-PATH"
+import { fileServices } from "../services/file.services"
 import { validationSystem } from "./fs.validation"
+
+
 
 class FileValidationClass {
   isUserAuthenticated(): boolean {
@@ -33,6 +35,21 @@ class FileValidationClass {
 
     // Belum ada access token — generate baru
     return await fileServices.generateAccessToken()
+  }
+
+  hasAccessToken(): boolean {
+    const userFile = serviceSystem.createPath(RACERFS_FOLDER_PATH, 'user.rcfs')
+    
+    if (!validationSystem.FileShouldBe('exist', userFile, { autoexit: false })) {
+      return false
+    }
+    
+    try {
+      const userData = serviceSystem.readFile(userFile, { isJson: true })
+      return !!userData.access_token
+    } catch {
+      return false
+    }
   }
 }
 

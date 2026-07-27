@@ -1,4 +1,4 @@
-import { snippetServices } from "@/services/snippet.services"
+import { snippetServices } from "../services/snippet.services"
 import { box } from "@clack/prompts"
 import chalk from "chalk"
 
