@@ -9,11 +9,7 @@
     "module": "esnext",
     "target": "esnext",
     "types": ["node"],
-    // For nodejs:
-    // "lib": ["esnext"],
-    // "types": ["node"],
-    // and npm install -D @types/node
-    // Other Outputs
+    "moduleResolution": "bundler",
     "sourceMap": true,
     "declaration": true,
     "declarationMap": true,
@@ -30,6 +26,10 @@
     // Recommended Options
     "strict": true,
     "jsx": "react-jsx",
+    "paths": {
+      "@/*": ["./src/*"],
+      "*": ["./src/*"]
+    },
     "verbatimModuleSyntax": true,
     "isolatedModules": true,
     "noUncheckedSideEffectImports": true,

@@ -1,10 +1,29 @@
+#!/usr/bin/env tsx
 
-const selected_option = process.argv[2] as string
-const selected_sub_option = process.argv[3] as string
-export const option_list = {
-    "auth": {
-        "--register": "register operation",
-        "--login": ""
-    },
+import { box } from '@clack/prompts';
+import 'dotenv/config';
+import { FilesHandler } from './files/handler';
+import { LoginOrRegisterHandler } from './loginorregister/handler';
+import { InitRacerFS } from './main_components/init.system';
+import { createSelectOption } from './main_components/select.option';
+import { paymentsHandler } from './payments/handler';
+import { SnippetsHandler } from './snippets/handler';
+import { testingHandler } from './testing/handler';
+
+InitRacerFS()
+box("Welcome to RacerFS TUI Menu", "Menu")
+process.on("SIGINT", () => {
+  console.log("Exist forcely from RacerFS")
+  process.exit(0)
+})
+while (true) {
+  await createSelectOption("Availble RacerFS Menu:", [
+    { label: 'Login/Register', action: LoginOrRegisterHandler },
+    { label: 'Manage snippets', action: SnippetsHandler },
+    { label: 'Manage files', action: FilesHandler },
+    { label: 'Storage Management', action: paymentsHandler },
+    { label: 'Use AI Mode', action: async () => console.log("AI Mode - Coming soon") },
+    { label: 'Testing', action: testingHandler },
+    { label: 'Exit', action: async () => process.exit(0) }
+  ])
 }
-console.log((option_list as any)[selected_option][selected_sub_option])

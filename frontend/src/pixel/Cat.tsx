@@ -55,7 +55,7 @@ function useEyeTracking(ref: React.RefObject<HTMLElement | null>, enabled: boole
     window.addEventListener('mousemove', onMove, { passive: true })
     window.addEventListener('scroll', resetCache, { passive: true })
     window.addEventListener('resize', resetCache, { passive: true })
-    
+
     return () => {
       window.removeEventListener('mousemove', onMove)
       window.removeEventListener('scroll', resetCache)

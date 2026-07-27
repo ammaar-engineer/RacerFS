@@ -1,9 +1,9 @@
-import { INestApplication, ValidationPipe } from "@nestjs/common"
+import { INestApplication, ValidationPipe } from "@nestjs/common";
 import { ConfigService } from "@nestjs/config";
 import { Test, TestingModule } from "@nestjs/testing";
-import request from 'supertest'
 import { AppModule } from "src/app.module";
 import { CustomGlobalException } from "src/GlobalException";
+import request from 'supertest';
 
 describe("Snippet Workflow - User Journey", () => {
     let app: INestApplication;
@@ -48,6 +48,7 @@ describe("Snippet Workflow - User Journey", () => {
         it("Berhasil membuat test account dan mendapatkan token", async () => {
             const res = await request(app.getHttpServer())
                 .get("/user/create-test-account")
+                .set("account-test", "emailsnippettest@gmail.com")
             
             expect(res.status).toBe(200)
             expect(res.body.success).toBe(true)

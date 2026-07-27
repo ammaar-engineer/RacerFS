@@ -24,15 +24,17 @@ export class CustomGlobalException extends BaseExceptionFilter {
       data: null,
       message: "Internal server error"
     }
-    // console.log(exception)
-    console.log("Pesan error: ",exception?.message)
-    console.log("Pesan error stack: ", exception?.stack)
     // console.error('=== Exception Details ===')
     // console.error('Type:', exception?.constructor?.name)
     // console.error('Message:', exception?.message)
     // console.error('Stack:', exception?.stack)
     // console.error('========================')
     if (isDevelopment) {
+      ServerOutput['debug'] = {
+        originalMessage: exception?.message ?? String(exception),
+        stack: exception?.stack,
+        exceptionType: exception?.constructor?.name ?? typeof exception,
+      }
     }
 
     if (exception instanceof BaseException) {

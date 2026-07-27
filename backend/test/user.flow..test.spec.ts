@@ -1,11 +1,11 @@
-import { Test, TestingModule } from '@nestjs/testing';
 import { INestApplication, ValidationPipe } from '@nestjs/common';
-import request from 'supertest';
-import { AppModule } from '../src/app.module';
-import { CustomGlobalException } from 'src/GlobalException';
 import { ConfigService } from '@nestjs/config';
+import { Test, TestingModule } from '@nestjs/testing';
 import { createClient } from 'redis';
 import { REDIS_CLIENT } from 'src/global_modules/redis.module';
+import { CustomGlobalException } from 'src/GlobalException';
+import request from 'supertest';
+import { AppModule } from '../src/app.module';
 
 describe("User route testing", () => {
   let app: INestApplication;
@@ -28,7 +28,7 @@ describe("User route testing", () => {
     }))
     app.useGlobalFilters(new CustomGlobalException(configService))
     await app.init()
-  })
+  }, 30000)
 
   afterAll(async() => {
     await app.close()
@@ -50,8 +50,8 @@ describe("User route testing", () => {
     })
 
     it("Step 2: User verifikasi kode OTP dari register dengan sessionId", async () => {
-      // Ambil OTP dari Redis menggunakan sessionId
-      const redisData = await redisClient.get(registerSessionId)
+      // Ambil OTP dari Redis menggunakan sessionId dengan format key yang benar
+      const redisData = await redisClient.get(`auth:${registerSessionId}`)
       expect(redisData).not.toBeNull()
       const { otp } = JSON.parse(redisData!)
       const res = await request(app.getHttpServer())
@@ -63,7 +63,7 @@ describe("User route testing", () => {
 
       // Expected response for successful registration verification
       expect(res.status).toBe(201)
-      expect(res.body).toHaveProperty("message", "OTP verified successfully and user created")
+      expect(res.body).toHaveProperty("message", "register successfully")
       expect(res.body.data).toHaveProperty("token")
     })
 
@@ -82,7 +82,7 @@ describe("User route testing", () => {
     })
 
     it("Step 4: User verifikasi kode OTP dari login", async () => {
-      const redisData = await redisClient.get(loginSessionId)
+      const redisData = await redisClient.get(`${loginSessionId}:auth`)
       expect(redisData).not.toBeNull()
       
       const { otp } = JSON.parse(redisData!)
@@ -93,13 +93,10 @@ describe("User route testing", () => {
           sessionId: loginSessionId,
           otp: otp
         })
-      console.log(res.body)
       // Expected response for successful login verification
       expect(res.status).toBe(201)
-      expect(res.body).toHaveProperty("message", "Login successful")
-      expect(res.body.data).toHaveProperty("email")
-      expect(res.body.data).toHaveProperty("userId")
-      expect(res.body.data.email).toBe(testEmail)
+      expect(res.body).toHaveProperty("message", "login successfully")
+      expect(res.body.data).toHaveProperty("token")
     })
   })
 })

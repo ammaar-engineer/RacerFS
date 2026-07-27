@@ -33,7 +33,7 @@ describe("Payment Workflow - Buy Storage", () => {
         it("Berhasil membuat test account dan mendapatkan token", async () => {
             const res = await request(app.getHttpServer())
                 .get("/user/create-test-account")
-            console.log("TEST ACCOUNT", res.body)
+                .set("account-test", "emailpaymenttest@gmail.com")
             expect(res.status).toBe(200)
             expect(res.body.success).toBe(true)
             expect(typeof res.body.data.token).toBe("string")
@@ -66,7 +66,6 @@ describe("Payment Workflow - Buy Storage", () => {
             const res = await request(app.getHttpServer())
                 .get("/payment/buy-storage")
                 .set("authorization", testAccountToken)
-            console.log(res.body)
             expect(res.status).toBe(200)
             expect(res.body.success).toBe(true)
             expect(res.body.message).toBe("Added 100mb+ to storage")
