@@ -1,6 +1,6 @@
-import { createSelectOption } from "../main_components/select.option";
-import { loginComponent } from "./login";
-import { registerComponent } from "./register";
+import { createSelectOption } from "../main_components/select.option.js";
+import { loginComponent } from "./login.js";
+import { registerComponent } from "./register.js";
 
 export async function LoginOrRegisterHandler() {
     await createSelectOption("What you will do?", [

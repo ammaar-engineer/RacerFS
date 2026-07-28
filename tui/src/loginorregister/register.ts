@@ -1,6 +1,6 @@
-import { serviceSystem } from "../services/fs.services";
-import { registerServicesClass } from "../services/register.services";
-import { RACERFS_FOLDER_PATH } from "../SYSTEM-PATH";
+import { serviceSystem } from "../services/fs.services.js";
+import { registerServicesClass } from "../services/register.services.js";
+import { RACERFS_FOLDER_PATH } from "../SYSTEM-PATH.js";
 import { box, text } from "@clack/prompts";
 import chalk from "chalk";
 

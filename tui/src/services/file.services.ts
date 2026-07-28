@@ -1,8 +1,8 @@
 import axios from "axios";
 import chalk from "chalk";
 import * as fs from "fs";
-import { BACKEND_URL, RACERFS_FOLDER_PATH } from "../SYSTEM-PATH";
-import { serviceSystem } from "./fs.services";
+import { BACKEND_URL, RACERFS_FOLDER_PATH } from "../SYSTEM-PATH.js";
+import { serviceSystem } from "./fs.services.js";
 
 export interface FileItem {
   id: number

@@ -1,4 +1,4 @@
-import { BACKEND_URL } from "../SYSTEM-PATH";
+import { BACKEND_URL } from "../SYSTEM-PATH.js";
 import axios from "axios";
 
 export class TestingServicesClass {

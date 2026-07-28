@@ -2,13 +2,19 @@
   "name": "racerfs-tui",
   "version": "1.0.0",
   "description": "",
-  "main": "main.ts",
+  "main": "./dist/main.js",
   "scripts": {
-    "dev": "npx tsx src/main.ts"
+    "dev": "npx tsx src/main.ts",
+    "build": "node_modules/.bin/tsc",
+    "prepublishOnly": "npm run build",
+    "prepack": "npm run build"
   },
   "bin": {
-    "racer-fs": "./src/main.ts"
+    "racer-fs": "./dist/main.js"
   },
+  "files": [
+    "dist"
+  ],
   "keywords": [],
   "author": "",
   "license": "ISC",
@@ -31,7 +37,6 @@
     "dotenv": "^17.4.2",
     "ink": "^7.1.0",
     "openai": "^6.49.0",
-    "react": "^19.2.7",
-    "tsc": "^2.0.4"
+    "react": "^19.2.7"
   }
 }

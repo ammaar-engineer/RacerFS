@@ -1,6 +1,6 @@
-import { serviceSystem } from "../services/fs.services";
-import { RACERFS_FOLDER_PATH } from "../SYSTEM-PATH";
-import { validationSystem } from "../validations/fs.validation";
+import { serviceSystem } from "../services/fs.services.js";
+import { RACERFS_FOLDER_PATH } from "../SYSTEM-PATH.js";
+import { validationSystem } from "../validations/fs.validation.js";
 
 export function InitRacerFS() {
     if (validationSystem.FolderShouldBe('notexist', RACERFS_FOLDER_PATH, {autoexit: false})) {

@@ -1,6 +1,6 @@
-import { RACERFS_FOLDER_PATH } from "../SYSTEM-PATH"
-import { serviceSystem } from "../services/fs.services"
-import { validationSystem } from "./fs.validation"
+import { RACERFS_FOLDER_PATH } from "../SYSTEM-PATH.js"
+import { serviceSystem } from "../services/fs.services.js"
+import { validationSystem } from "./fs.validation.js"
 
 class SnippetValidationClass {
   isUserAuthenticated(): boolean {
