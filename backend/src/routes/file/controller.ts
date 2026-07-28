@@ -162,8 +162,16 @@ export class FileRouteController {
                 message: 'Upload URL generated successfully',
                 errorCode: '',
                 data: {
-                    url: 'https://s3.amazonaws.com/bucket/file-key?X-Amz-Signature=...',
-                    fields: {}
+                    url: 'https://minio.example.com/racerfs-bucket',
+                    formData: {
+                        key: 'a1b2c3d4-e5f6-7890-abcd-ef1234567890',
+                        policy: 'eyJleHBpcmF0aW9uIjoiMjAyNi0wMS0wMVQwMTowMDowMC4wMDBaIiwiY29uZGl0aW9ucyI6W1siZXEiLCIka2V5IiwiYTFiMmMzZDQtZTVmNi03ODkwLWFiY2QtZWYxMjM0NTY3ODkwIl1dfQ==',
+                        'x-amz-algorithm': 'AWS4-HMAC-SHA256',
+                        'x-amz-credential': 'minioadmin/20260101/us-east-1/s3/aws4_request',
+                        'x-amz-date': '20260101T000000Z',
+                        'x-amz-signature': '1234567890abcdef1234567890abcdef1234567890abcdef1234567890abcdef'
+                    },
+                    file_key: 'a1b2c3d4-e5f6-7890-abcd-ef1234567890'
                 }
             }
         }
