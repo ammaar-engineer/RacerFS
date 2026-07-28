@@ -113,8 +113,29 @@ export class FileServices {
     }
 
     async removeFile(file_name: string, user_id: number) {
-        await this.fileValidations.fileShouldBe("exist", file_name, user_id, {throwErr: false})
-        await this.fileRepo.delete({name: file_name, user_id})
+        // Validate file exists and get file data (including size)
+        await this.fileValidations.fileShouldBe("exist", file_name, user_id, {throwErr: true})
+
+        const fileToDelete = await this.fileRepo.findOne({
+            where: { name: file_name, user_id },
+            loadEagerRelations: false
+        })
+
+        if (!fileToDelete) {
+            throw new NotFoundException("File not found")
+        }
+
+        const fileSize = Number(fileToDelete.size)
+
+        // Delete file record
+        await this.fileRepo.delete({ name: file_name, user_id })
+
+        // Decrement user's used_storage
+        await this.userRepo.decrement(
+            { id: user_id },
+            'used_storage',
+            fileSize
+        )
     }
 
     async createFile({name, size, user_id, file_key, file_type}:{name: string, size: number, user_id: number, file_key: string, file_type?: string | null}) {
