@@ -53,7 +53,7 @@ describe("File Workflow - User Journey", () => {
     describe("Setup 2: Generate access token", () => {
         it("Berhasil generate access token", async () => {
             const res = await request(app.getHttpServer())
-                .post("/file/generate-access-token")
+                .post("/token/generate-access-token")
                 .set("authorization", testAccountToken)
             expect(res.status).toBe(201)
             expect(res.body.success).toBe(true)

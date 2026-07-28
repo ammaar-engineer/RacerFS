@@ -3,7 +3,7 @@ import { ApiBody, ApiHeader, ApiOperation, ApiQuery, ApiResponse, ApiTags } from
 import { SnippetServices } from "src/services/snippet.services";
 import { SuccessResponse } from "src/utilities/Success.Response";
 import { DtoUtilites } from "src/utilities/custom.dto.validator";
-import { SnippetCreateBodyDTO, SnippetCreateHeaderDTO, SnippetDeleteHeaderDTO, SnippetDeleteQueryDTO, SnippetEditBodyDTO, SnippetEditHeaderDTO, SnippetEditQueryDTO, SnippetListHeaderDTO } from "src/validation/snippet.route.dto";
+import { SnippetCreateBodyDTO, SnippetCreateHeaderDTO, SnippetDeleteHeaderDTO, SnippetDeleteQueryDTO, SnippetEditBodyDTO, SnippetEditHeaderDTO, SnippetEditQueryDTO, SnippetListHeaderDTO } from "src/routes/models/snippet.route.dto";
 import { TokenValidations } from "src/validation/token.validations";
 
 @ApiTags('snippet')

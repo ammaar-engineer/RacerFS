@@ -9,6 +9,7 @@ import { TokenModule } from './global_services/token.services';
 import { FileRouteModule } from './routes/file/module';
 import { PaymentRouteModule } from './routes/payments/module';
 import { SnippetRouteModule } from './routes/snippet/module';
+import { TokenRouteModule } from './routes/token/module';
 import { UserRoutesModule } from './routes/user/module';
 @Module({
   imports: [
@@ -23,6 +24,7 @@ import { UserRoutesModule } from './routes/user/module';
     TokenModule,
     UserRoutesModule,
     FileRouteModule,
+    TokenRouteModule,
     SnippetRouteModule,
     PaymentRouteModule
   ],

@@ -6,7 +6,7 @@ import { FileServices } from "src/services/file.services";
 import { UserServices } from "src/services/user.services";
 import { SuccessResponse } from "src/utilities/Success.Response";
 import { AuthValidations } from "src/validation/auth.validations";
-import { UserDeleteAccount, UserLoginDTO, UserRegisterDTO, VerifyOtpDTO } from "src/validation/user.route.dto";
+import { UserDeleteAccount, UserLoginDTO, UserRegisterDTO, VerifyOtpDTO } from "src/routes/models/user.route.dto";
 import { UserValidations } from "src/validation/user.validations";
 
 @ApiTags('user')
