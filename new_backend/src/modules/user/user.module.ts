@@ -9,6 +9,9 @@ import { File } from '../../entities/file.entity';
 // Shared Services
 import { JwtModule } from '../../services/jwt.service';
 
+// External Modules
+import { FileModule } from '../file/file.module';
+
 // Controllers
 import { UserController } from './controllers/user.controller';
 
@@ -24,6 +27,7 @@ import { AuthValidation } from './validations/auth.validation';
   imports: [
     TypeOrmModule.forFeature([User, Token, File]),
     JwtModule,
+    FileModule,
   ],
   controllers: [UserController],
   providers: [

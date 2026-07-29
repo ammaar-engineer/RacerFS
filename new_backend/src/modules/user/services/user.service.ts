@@ -2,10 +2,10 @@ import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { User } from '../../../entities/user.entity';
-// TokenService not needed - we use JwtService directly
 import { JwtService } from '../../../services/jwt.service';
 import { AuthValidation } from '../validations/auth.validation';
 import { UserValidation } from '../validations/user.validation';
+import { FileService } from '../../file/services/file.service';
 import { NotFoundException } from '../../../middleware/exceptions';
 
 @Injectable()
@@ -16,6 +16,7 @@ export class UserService {
     private readonly jwtService: JwtService,
     private readonly authValidation: AuthValidation,
     private readonly userValidation: UserValidation,
+    private readonly fileService: FileService,
   ) {}
 
   async verifyOtpAndAuthenticate(
@@ -63,8 +64,14 @@ export class UserService {
       type: string;
     }>(authToken);
 
-    // Get user by email
-    const user = await this.findUserByEmail(email);
+    // Get user by email with files relation
+    const user = await this.userRepo.findOne({
+      where: { email },
+      relations: {
+        files: true,
+      },
+    });
+
     if (!user) {
       throw new NotFoundException('User not found');
     }
@@ -74,7 +81,13 @@ export class UserService {
       throw new NotFoundException('Unauthorized action');
     }
 
-    // Delete user
+    // Delete files from MinIO storage
+    if (user.files && user.files.length > 0) {
+      const fileKeys = user.files.map((file) => file.file_key);
+      await this.fileService.removeObjects(fileKeys);
+    }
+
+    // Delete user (cascade will delete files from DB)
     await this.userRepo.delete({ email });
   }
 

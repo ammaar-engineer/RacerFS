@@ -1,7 +1,8 @@
 src/
 ├── modules/
-│   └── user/
+│   └── file/
 │       ├── controllers/
+           └── docs/
 │       ├── services/
 │       ├── validations/
 │       ├── dto/
