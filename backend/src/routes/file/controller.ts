@@ -1,10 +1,9 @@
 import { Body, Controller, Delete, Get, Headers, Patch, Post, Query } from "@nestjs/common";
 import { ApiBody, ApiHeader, ApiOperation, ApiQuery, ApiResponse, ApiTags } from "@nestjs/swagger";
-import { TokenServices } from "src/global_services/token.services";
+import { FileConfirmUploadBodyDTO, FileConfirmUploadHeaderDTO, FileDeleteBodyDTO, FileDeleteHeadersDTO, FileDownloadHeaderDTO, FileDownloadQueryDTO, FileGetPresignedUploadHeaderDTO, FileGetPresignedUploadQueryDTO, FileListHeaderDTO, FileRenameBodyDTO, FileRenameHeaderDTO, FileSetVisibilityBodyDTO, FileSetVisibilityHeaderDTO, FileStorageInfoHeaderDTO } from "src/models/file.route.dto";
 import { FileServices } from "src/services/file.services";
 import { DtoUtilites } from "src/utilities/custom.dto.validator";
 import { SuccessResponse } from "src/utilities/Success.Response";
-import { FileConfirmUploadBodyDTO, FileConfirmUploadHeaderDTO, FileDeleteAccessTokenBodyDTO, FileDeleteAccessTokenHeaderDTO, FileDeleteBodyDTO, FileDeleteHeadersDTO, FileDownloadHeaderDTO, FileDownloadQueryDTO, FileGenerateAccessTokenHeaderDTO, FileGetPresignedUploadHeaderDTO, FileGetPresignedUploadQueryDTO, FileListHeaderDTO, FileRenameBodyDTO, FileRenameHeaderDTO, FileSetVisibilityBodyDTO, FileSetVisibilityHeaderDTO, FileStorageInfoHeaderDTO } from "src/validation/file.route.dto";
 import { FileValidations } from "src/validation/file.validations";
 import { TokenValidations } from "src/validation/token.validations";
 
@@ -15,7 +14,6 @@ export class FileRouteController {
         private readonly tokenValidations: TokenValidations,
         private readonly fileValidations: FileValidations,
         private readonly fileServices: FileServices,
-        private readonly tokenServices: TokenServices,
         private readonly dtoUtilites: DtoUtilites,
     ) {}
 
@@ -37,6 +35,7 @@ export class FileRouteController {
                             id: 1,
                             name: 'photo.png',
                             size: 204800,
+                            file_type: '.png',
                             is_public: false,
                             file_key: 'a1b2c3d4-e5f6-7890-abcd-ef1234567890',
                             uploaded_at: '2026-01-01T00:00:00.000Z',
@@ -94,11 +93,11 @@ export class FileRouteController {
             headerData['access-token'],
             { throwError: true }
         )
-        const { file_key } = await this.fileServices.getFileByName({
+        const { file_key } = await this.fileServices.getFileKeyByName({
             file_name: queryData['file-name'],
             user_id: accountToken_user_id
         })
-        const url = await this.fileServices.getPresignedDownloadUrl(file_key as string)
+        const url = await this.fileServices.getPresignedDownloadUrl(file_key as string, queryData['file-name'])
         return SuccessResponse("Download URL generated successfully", { url });
     }
 
@@ -162,8 +161,16 @@ export class FileRouteController {
                 message: 'Upload URL generated successfully',
                 errorCode: '',
                 data: {
-                    url: 'https://s3.amazonaws.com/bucket/file-key?X-Amz-Signature=...',
-                    fields: {}
+                    url: 'https://minio.example.com/racerfs-bucket',
+                    formData: {
+                        key: 'a1b2c3d4-e5f6-7890-abcd-ef1234567890',
+                        policy: 'eyJleHBpcmF0aW9uIjoiMjAyNi0wMS0wMVQwMTowMDowMC4wMDBaIiwiY29uZGl0aW9ucyI6W1siZXEiLCIka2V5IiwiYTFiMmMzZDQtZTVmNi03ODkwLWFiY2QtZWYxMjM0NTY3ODkwIl1dfQ==',
+                        'x-amz-algorithm': 'AWS4-HMAC-SHA256',
+                        'x-amz-credential': 'minioadmin/20260101/us-east-1/s3/aws4_request',
+                        'x-amz-date': '20260101T000000Z',
+                        'x-amz-signature': '1234567890abcdef1234567890abcdef1234567890abcdef1234567890abcdef'
+                    },
+                    file_key: 'a1b2c3d4-e5f6-7890-abcd-ef1234567890'
                 }
             }
         }
@@ -176,6 +183,15 @@ export class FileRouteController {
         const headerData = await this.dtoUtilites.validateSourceDTO(FileGetPresignedUploadHeaderDTO, headers)
         const queryData = await this.dtoUtilites.validateSourceDTO(FileGetPresignedUploadQueryDTO, query)
         const { user_id } = this.tokenValidations.isValidAccountToken(headerData['authorization'])
+
+        // Check if file with same name already exists
+        await this.fileValidations.fileShouldBe(
+            "notexist",
+            queryData['file-name'],
+            user_id,
+            {throwErr: true}
+        )
+
         const file_key = crypto.randomUUID()
         const presignedData = await this.fileServices.getPresignedUploadUrl(
             file_key,
@@ -231,68 +247,6 @@ export class FileRouteController {
         return SuccessResponse(message)
     }
 
-    @ApiOperation({ summary: 'Generate a new access token' })
-    @ApiHeader({ name: 'authorization', description: 'JWT account token', required: true })
-    @ApiResponse({
-        status: 200,
-        description: 'Access token generated successfully',
-        schema: {
-            example: {
-                success: true,
-                statusCode: 200,
-                message: 'Access token generated successfully',
-                errorCode: '',
-                data: { access_token: 'at_abc123xyz...' }
-            }
-        }
-    })
-    @Post("generate-access-token")
-    async generateAccessToken(
-        @Headers() headers: Record<string, string>,
-    ) {
-        const headerData = await this.dtoUtilites.validateSourceDTO(FileGenerateAccessTokenHeaderDTO, headers)
-        const { user_id } = this.tokenValidations.isValidAccountToken(headerData['authorization'])
-        const token = await this.tokenServices.generateAccessToken(user_id)
-        await this.tokenServices.createAccessToken(user_id, token)
-        return SuccessResponse("Access token generated successfully", { access_token: token })
-    }
-
-    @ApiOperation({ summary: 'Delete an access token' })
-    @ApiHeader({ name: 'authorization', description: 'JWT account token', required: true })
-    @ApiBody({
-        schema: {
-            type: 'object',
-            required: ['token'],
-            properties: {
-                'token': { type: 'string', example: 'at_abc123xyz...', description: 'Access token to delete' }
-            }
-        }
-    })
-    @ApiResponse({
-        status: 200,
-        description: 'Access token deleted successfully',
-        schema: {
-            example: {
-                success: true,
-                statusCode: 200,
-                message: 'Access token deleted successfully',
-                errorCode: '',
-                data: null
-            }
-        }
-    })
-    @Delete("delete-access-token")
-    async deleteAccessToken(
-        @Headers() headers: Record<string, string>,
-        @Body() body: Record<string, string>,
-    ) {
-        const headerData = await this.dtoUtilites.validateSourceDTO(FileDeleteAccessTokenHeaderDTO, headers)
-        const bodyData = await this.dtoUtilites.validateSourceDTO(FileDeleteAccessTokenBodyDTO, body)
-        const { user_id } = this.tokenValidations.isValidAccountToken(headerData['authorization'])
-        await this.tokenServices.deleteAccessToken(bodyData['token'], user_id)
-        return SuccessResponse("Access token deleted successfully")
-    }
-
     @ApiOperation({ summary: 'Delete a file' })
     @ApiHeader({ name: 'authorization', description: 'JWT account token', required: true })
     @ApiResponse({
@@ -329,7 +283,7 @@ export class FileRouteController {
         const headerData = await this.dtoUtilites.validateSourceDTO(FileDeleteHeadersDTO, headers)
         const bodyData = await this.dtoUtilites.validateSourceDTO(FileDeleteBodyDTO, body)
         const { user_id } = this.tokenValidations.isValidAccountToken(headerData['authorization'])
-        const { file_key } = await this.fileServices.getFileByName({
+        const { file_key } = await this.fileServices.getFileKeyByName({
             file_name: bodyData['file-name'],
             user_id
         })
@@ -363,6 +317,7 @@ export class FileRouteController {
                     id: 1,
                     name: 'photo.png',
                     size: 204800,
+                    file_type: '.png',
                     is_public: true,
                     file_key: 'a1b2c3d4-e5f6-7890-abcd-ef1234567890',
                     uploaded_at: '2026-01-01T00:00:00.000Z',

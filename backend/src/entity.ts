@@ -119,6 +119,9 @@ export class File {
   @Column({ type: 'varchar', length: 50 })
   file_key!: string;
 
+  @Column({ type: 'varchar', length: 20, nullable: true })
+  file_type!: string | null;
+
   @CreateDateColumn({ type: 'timestamp with time zone' })
   uploaded_at!: Date;
 

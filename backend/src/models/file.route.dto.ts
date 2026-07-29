@@ -114,26 +114,6 @@ export class FileDeleteBodyDTO {
     "file-name"!: string
 }
 
-export class FileGenerateAccessTokenHeaderDTO {
-    @ApiProperty({ example: 'eyJhbGciOiJIUzI1NiJ9...', description: 'JWT account token' })
-    @IsString()
-    @IsNotEmpty()
-    "authorization"!: string
-}
-
-export class FileDeleteAccessTokenHeaderDTO {
-    @ApiProperty({ example: 'eyJhbGciOiJIUzI1NiJ9...', description: 'JWT account token' })
-    @IsString()
-    @IsNotEmpty()
-    "authorization"!: string
-}
-export class FileDeleteAccessTokenBodyDTO {
-    @ApiProperty({ example: 'at_abc123', description: 'Access token to delete' })
-    @IsString()
-    @IsNotEmpty()
-    "token"!: string
-}
-
 export class FileSetVisibilityHeaderDTO {
     @ApiProperty({ example: 'eyJhbGciOiJIUzI1NiJ9...', description: 'JWT account token' })
     @IsString()

@@ -1,9 +1,9 @@
 import { Controller, Get, Headers } from "@nestjs/common";
 import { ApiHeader, ApiOperation, ApiResponse, ApiTags } from "@nestjs/swagger";
+import { BuyStorageHeadersDTO } from "src/models/payment.route.dto";
 import { PaymentServices } from "src/services/payments.services";
 import { DtoUtilites } from "src/utilities/custom.dto.validator";
 import { SuccessResponse } from "src/utilities/Success.Response";
-import { BuyStorageHeadersDTO } from "src/validation/payment.route.dto";
 import { TokenValidations } from "src/validation/token.validations";
 
 @ApiTags('payment')

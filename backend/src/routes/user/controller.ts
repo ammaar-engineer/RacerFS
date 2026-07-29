@@ -1,12 +1,12 @@
 import { Body, Controller, Delete, Get, Headers, Post } from "@nestjs/common";
 import { ApiBody, ApiHeader, ApiOperation, ApiResponse, ApiTags } from "@nestjs/swagger";
 import { JwtService } from "src/global_services/jwt.services";
+import { UserDeleteAccount, UserLoginDTO, UserRegisterDTO, VerifyOtpDTO } from "src/models/user.route.dto";
 import { AuthServices } from "src/services/auth.services";
 import { FileServices } from "src/services/file.services";
 import { UserServices } from "src/services/user.services";
 import { SuccessResponse } from "src/utilities/Success.Response";
 import { AuthValidations } from "src/validation/auth.validations";
-import { UserDeleteAccount, UserLoginDTO, UserRegisterDTO, VerifyOtpDTO } from "src/validation/user.route.dto";
 import { UserValidations } from "src/validation/user.validations";
 
 @ApiTags('user')
@@ -115,6 +115,7 @@ export class UserController {
     }
 
     @ApiOperation({ summary: 'Delete user account' })
+    @ApiHeader({ name: 'Authorization', description: 'Bearer token for authentication', required: true })
     @ApiBody({
         schema: {
             type: 'object',
@@ -139,14 +140,26 @@ export class UserController {
     })
     @Delete("delete")
     async deleteAccount(
+        @Headers() headers: Record<string, string>,
         @Body() body: UserDeleteAccount
     ) {
         const {email} = body
+        const authorization = headers['authorization']
+
+        // Verify token exists
+        const payload = await this.authValidations.verifyToken(authorization)
+
+        // Verify the token belongs to the account being deleted
         const targetUser = await this.userValidations.isEmail('exist', email)
+
+        if (payload.user_id !== targetUser?.id) {
+            throw new Error('Unauthorized: You can only delete your own account')
+        }
+
         await this.userServices.deleteUser(email)
         const fileList = targetUser?.files.map(data => data.file_key)
         await this.fileService.removeObject(fileList as string[])
-        SuccessResponse("Account has been deleted")
+        return SuccessResponse("Account has been deleted")
     }
 
     @ApiOperation({ summary: 'Create a test account' })

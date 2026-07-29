@@ -20,30 +20,50 @@ export class FileServices {
     ) {}
 
     async createUploadSession(user_id: number, file_name: string, file_size: number, file_key: string) {
+        // Extract file extension
+        const file_type = this.extractFileType(file_name)
+
         await this.redisService.set(
             `upload:${file_key}`,
-            JSON.stringify({ user_id, file_name, file_size }),
+            JSON.stringify({ user_id, file_name, file_size, file_type }),
             { EX: 7200 }
         )
         return {file_key}
     }
 
+    private extractFileType(file_name: string): string | null {
+        const lastDotIndex = file_name.lastIndexOf('.')
+        if (lastDotIndex === -1 || lastDotIndex === file_name.length - 1) {
+            return null // No extension or dot at the end
+        }
+        return file_name.substring(lastDotIndex).toLowerCase() // Include the dot, e.g., ".pdf"
+    }
+
     async confirmOption(
-        status: "SUCCESS" | "FAILED", 
-        file_name: string, 
-        file_key: string, 
-        user_id: number, 
+        status: "SUCCESS" | "FAILED",
+        file_name: string,
+        file_key: string,
+        user_id: number,
         expectedSize: number
     ) {
-        await this.fileValidations.consumeUploadSession(file_key, user_id, file_name, expectedSize)
+        const session = await this.fileValidations.consumeUploadSession(file_key, user_id, file_name, expectedSize)
         if (status === "SUCCESS") {
             const size = await this.fileValidations.validateFileSize(file_key, expectedSize)
             await this.createFile({
                 name: file_name,
                 size,
                 user_id,
-                file_key
+                file_key,
+                file_type: session.file_type
             })
+
+            // Update user's used_storage after successful upload
+            await this.userRepo.increment(
+                { id: user_id },
+                'used_storage',
+                size
+            )
+
             return `File ${file_name} has been uploaded successfully`
         }
         await this.removeObject(file_key)
@@ -67,6 +87,7 @@ export class FileServices {
             id: data.id,
             name: data.name,
             size: data.size,
+            file_type: data.file_type,
             uploaded_at: data.uploaded_at
         }))
     }
@@ -82,7 +103,7 @@ export class FileServices {
         return { oldName }
     }
 
-    async getFileByName({file_name, user_id}:{file_name: string, user_id: number}) {
+    async getFileKeyByName({file_name, user_id}:{file_name: string, user_id: number}) {
         const file = await this.fileRepo.findOne({
             where: { name: file_name, user_id },
             loadEagerRelations: false
@@ -92,16 +113,38 @@ export class FileServices {
     }
 
     async removeFile(file_name: string, user_id: number) {
-        await this.fileValidations.fileShouldBe("exist", file_name, user_id, {throwErr: false})
-        await this.fileRepo.delete({name: file_name, user_id})
+        // Validate file exists and get file data (including size)
+        await this.fileValidations.fileShouldBe("exist", file_name, user_id, {throwErr: true})
+
+        const fileToDelete = await this.fileRepo.findOne({
+            where: { name: file_name, user_id },
+            loadEagerRelations: false
+        })
+
+        if (!fileToDelete) {
+            throw new NotFoundException("File not found")
+        }
+
+        const fileSize = Number(fileToDelete.size)
+
+        // Delete file record
+        await this.fileRepo.delete({ name: file_name, user_id })
+
+        // Decrement user's used_storage
+        await this.userRepo.decrement(
+            { id: user_id },
+            'used_storage',
+            fileSize
+        )
     }
 
-    async createFile({name, size, user_id, file_key}:{name: string, size: number, user_id: number, file_key: string}) {
+    async createFile({name, size, user_id, file_key, file_type}:{name: string, size: number, user_id: number, file_key: string, file_type?: string | null}) {
         const newFile = new File()
         newFile.name = name
         newFile.size = size
         newFile.user_id = user_id
         newFile.file_key = file_key
+        newFile.file_type = file_type || null
         newFile.is_public = false
         await this.fileRepo.save(newFile)
         return newFile
@@ -122,8 +165,15 @@ export class FileServices {
         return { file_name, is_public }
     }
 
-    async getPresignedDownloadUrl(objectName: string, expiry: number = 3600) {
-        const url = await this.minioService.presignedGetObject("racerfs-bucket", objectName, expiry)
+    async getPresignedDownloadUrl(objectName: string, fileName: string, expiry: number = 3600) {
+        const url = await this.minioService.presignedGetObject(
+            "racerfs-bucket",
+            objectName,
+            expiry,
+            {
+                'response-content-disposition': `attachment; filename="${fileName}"`
+            }
+        )
         return url
     }
 

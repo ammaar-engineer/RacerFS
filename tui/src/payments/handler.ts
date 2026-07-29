@@ -1,6 +1,6 @@
 import chalk from "chalk"
-import { createSelectOption } from "../main_components/select.option"
-import { paymentServices } from "../services/payment.services"
+import { createSelectOption } from "../main_components/select.option.js"
+import { paymentServices } from "../services/payment.services.js"
 
 function formatBytes(bytes: number): string {
   const mb = bytes / (1024 * 1024)

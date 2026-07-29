@@ -1,8 +1,8 @@
 import axios from "axios";
 import chalk from "chalk";
 import * as fs from "fs";
-import { BACKEND_URL, RACERFS_FOLDER_PATH } from "../SYSTEM-PATH";
-import { serviceSystem } from "./fs.services";
+import { BACKEND_URL, RACERFS_FOLDER_PATH } from "../SYSTEM-PATH.js";
+import { serviceSystem } from "./fs.services.js";
 
 export interface FileItem {
   id: number
@@ -33,7 +33,7 @@ export class FileServicesClass {
     try {
       const { accountToken } = this.getTokens()
       const response = await axios.post(
-        `${BACKEND_URL}/file/generate-access-token`,
+        `${BACKEND_URL}/token/generate-access-token`,
         {},
         { headers: { authorization: accountToken } }
       )
@@ -58,7 +58,7 @@ export class FileServicesClass {
     try {
       const { accountToken } = this.getTokens()
       await axios.delete(
-        `${BACKEND_URL}/file/delete-access-token`,
+        `${BACKEND_URL}/token/delete-access-token`,
         {
           headers: { authorization: accountToken },
           data: { token }

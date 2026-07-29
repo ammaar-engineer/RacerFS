@@ -1,9 +1,9 @@
 import { text } from "@clack/prompts"
 import chalk from "chalk"
-import { createSelectOption } from "../main_components/select.option"
-import { serviceSystem } from "../services/fs.services"
-import { testingServices } from "../services/testing.services"
-import { RACERFS_FOLDER_PATH } from "../SYSTEM-PATH"
+import { createSelectOption } from "../main_components/select.option.js"
+import { serviceSystem } from "../services/fs.services.js"
+import { testingServices } from "../services/testing.services.js"
+import { RACERFS_FOLDER_PATH } from "../SYSTEM-PATH.js"
 
 export async function testingHandler() {
     await createSelectOption("Testing Menu", [

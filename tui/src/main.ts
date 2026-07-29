@@ -1,14 +1,14 @@
-#!/usr/bin/env tsx
+#!/usr/bin/env node
 
 import { box } from '@clack/prompts';
 import 'dotenv/config';
-import { FilesHandler } from './files/handler';
-import { LoginOrRegisterHandler } from './loginorregister/handler';
-import { InitRacerFS } from './main_components/init.system';
-import { createSelectOption } from './main_components/select.option';
-import { paymentsHandler } from './payments/handler';
-import { SnippetsHandler } from './snippets/handler';
-import { testingHandler } from './testing/handler';
+import { FilesHandler } from './files/handler.js';
+import { LoginOrRegisterHandler } from './loginorregister/handler.js';
+import { InitRacerFS } from './main_components/init.system.js';
+import { createSelectOption } from './main_components/select.option.js';
+import { paymentsHandler } from './payments/handler.js';
+import { SnippetsHandler } from './snippets/handler.js';
+import { testingHandler } from './testing/handler.js';
 
 InitRacerFS()
 box("Welcome to RacerFS TUI Menu", "Menu")

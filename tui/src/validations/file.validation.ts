@@ -1,7 +1,7 @@
-import { serviceSystem } from "../services/fs.services"
-import { RACERFS_FOLDER_PATH } from "../SYSTEM-PATH"
-import { fileServices } from "../services/file.services"
-import { validationSystem } from "./fs.validation"
+import { serviceSystem } from "../services/fs.services.js"
+import { RACERFS_FOLDER_PATH } from "../SYSTEM-PATH.js"
+import { fileServices } from "../services/file.services.js"
+import { validationSystem } from "./fs.validation.js"
 
 
 

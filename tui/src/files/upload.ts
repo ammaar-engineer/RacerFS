@@ -2,7 +2,7 @@ import { select, text } from "@clack/prompts"
 import chalk from "chalk"
 import * as fs from "fs"
 import * as path from "path"
-import { fileServices } from "../services/file.services"
+import { fileServices } from "../services/file.services.js"
 
 function formatBytes(bytes: number): string {
   const kb = bytes / 1024

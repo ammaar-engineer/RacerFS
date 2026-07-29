@@ -1,13 +1,13 @@
 import chalk from "chalk"
-import { createSelectOption } from "../main_components/select.option"
-import { fileValidation } from "../validations/file.validation"
-import { TokensHandler } from "./tokens"
-import { listFiles } from "./list"
-import { uploadFile } from "./upload"
-import { downloadFile } from "./download"
-import { renameFile } from "./rename"
-import { deleteFile } from "./delete"
-import { setVisibility } from "./visibility"
+import { createSelectOption } from "../main_components/select.option.js"
+import { fileValidation } from "../validations/file.validation.js"
+import { TokensHandler } from "./tokens.js"
+import { listFiles } from "./list.js"
+import { uploadFile } from "./upload.js"
+import { downloadFile } from "./download.js"
+import { renameFile } from "./rename.js"
+import { deleteFile } from "./delete.js"
+import { setVisibility } from "./visibility.js"
 
 export async function FilesHandler() {
   if (!fileValidation.isUserAuthenticated()) {

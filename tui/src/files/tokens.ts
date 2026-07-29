@@ -1,7 +1,7 @@
-import { createSelectOption } from "../main_components/select.option"
-import { fileServices } from "../services/file.services"
-import { serviceSystem } from "../services/fs.services"
-import { RACERFS_FOLDER_PATH } from "../SYSTEM-PATH"
+import { createSelectOption } from "../main_components/select.option.js"
+import { fileServices } from "../services/file.services.js"
+import { serviceSystem } from "../services/fs.services.js"
+import { RACERFS_FOLDER_PATH } from "../SYSTEM-PATH.js"
 import { note } from "@clack/prompts"
 import chalk from "chalk"
 

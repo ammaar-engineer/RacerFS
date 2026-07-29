@@ -1,4 +1,4 @@
-import { fileServices } from "../services/file.services"
+import { fileServices } from "../services/file.services.js"
 import { select } from "@clack/prompts"
 import chalk from "chalk"
 

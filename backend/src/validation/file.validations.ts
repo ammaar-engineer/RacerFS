@@ -42,6 +42,7 @@ export class FileValidations {
             throw new BadRequestException("File size mismatch")
         }
         await this.redisService.del(`upload:${file_key}`)
+        return session // Return session data including file_type
     }
 
     async fileShouldBe(type: 'exist' | 'notexist', file_name: string, user_id: number, {throwErr = false}: {throwErr: boolean}) {

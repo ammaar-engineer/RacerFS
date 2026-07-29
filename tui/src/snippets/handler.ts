@@ -1,10 +1,10 @@
 import chalk from "chalk"
-import { createSelectOption } from "../main_components/select.option"
-import { snippetValidation } from "../validations/snippet.validation"
-import { createSnippet } from "./create"
-import { deleteSnippet } from "./delete"
-import { editSnippet } from "./edit"
-import { listSnippets } from "./list"
+import { createSelectOption } from "../main_components/select.option.js"
+import { snippetValidation } from "../validations/snippet.validation.js"
+import { createSnippet } from "./create.js"
+import { deleteSnippet } from "./delete.js"
+import { editSnippet } from "./edit.js"
+import { listSnippets } from "./list.js"
 
 export async function SnippetsHandler() {
   // Check authentication first
