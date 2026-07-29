@@ -1,9 +1,9 @@
 import { Body, Controller, Delete, Get, Headers, Patch, Post, Query } from "@nestjs/common";
 import { ApiBody, ApiHeader, ApiOperation, ApiQuery, ApiResponse, ApiTags } from "@nestjs/swagger";
+import { SnippetCreateBodyDTO, SnippetCreateHeaderDTO, SnippetDeleteHeaderDTO, SnippetDeleteQueryDTO, SnippetEditBodyDTO, SnippetEditHeaderDTO, SnippetEditQueryDTO, SnippetListHeaderDTO } from "src/models/snippet.route.dto";
 import { SnippetServices } from "src/services/snippet.services";
 import { SuccessResponse } from "src/utilities/Success.Response";
 import { DtoUtilites } from "src/utilities/custom.dto.validator";
-import { SnippetCreateBodyDTO, SnippetCreateHeaderDTO, SnippetDeleteHeaderDTO, SnippetDeleteQueryDTO, SnippetEditBodyDTO, SnippetEditHeaderDTO, SnippetEditQueryDTO, SnippetListHeaderDTO } from "src/routes/models/snippet.route.dto";
 import { TokenValidations } from "src/validation/token.validations";
 
 @ApiTags('snippet')

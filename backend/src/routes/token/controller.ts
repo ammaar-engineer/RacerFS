@@ -1,10 +1,10 @@
 import { Body, Controller, Delete, Headers, Post } from "@nestjs/common";
 import { ApiBody, ApiHeader, ApiOperation, ApiResponse, ApiTags } from "@nestjs/swagger";
 import { TokenServices } from "src/global_services/token.services";
+import { TokenDeleteAccessTokenBodyDTO, TokenDeleteAccessTokenHeaderDTO, TokenGenerateAccessTokenHeaderDTO } from "src/models/token.route.dto";
 import { DtoUtilites } from "src/utilities/custom.dto.validator";
 import { SuccessResponse } from "src/utilities/Success.Response";
 import { TokenValidations } from "src/validation/token.validations";
-import { TokenDeleteAccessTokenBodyDTO, TokenDeleteAccessTokenHeaderDTO, TokenGenerateAccessTokenHeaderDTO } from "src/routes/models/token.route.dto";
 
 @ApiTags('token')
 @Controller("token")
