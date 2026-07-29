@@ -13,6 +13,9 @@ import { JwtModule } from './services/jwt.service';
 
 // Feature Modules
 import { UserModule } from './modules/user/user.module';
+import { FileModule } from './modules/file/file.module';
+import { SnippetModule } from './modules/snippet/snippet.module';
+import { PaymentModule } from './modules/payment/payment.module';
 
 @Module({
   imports: [
@@ -34,6 +37,9 @@ import { UserModule } from './modules/user/user.module';
 
     // Feature Modules
     UserModule, // User authentication & management
+    FileModule, // File upload & management
+    SnippetModule, // Command snippets
+    PaymentModule, // Payment & storage management
   ],
   controllers: [],
   providers: [],

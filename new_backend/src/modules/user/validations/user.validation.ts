@@ -17,19 +17,24 @@ export class UserValidation {
   async isEmailExist(email: string): Promise<User | null> {
     return await this.userRepo.findOne({
       where: { email },
+      loadEagerRelations: false,
     });
   }
 
-  async validateEmailNotExists(email: string): Promise<void> {
-    const user = await this.isEmailExist(email);
-    if (user) {
-      throw new ConflictException('Email already exists');
+  async emailShouldBe(
+    what: 'exist' | 'notexist',
+    email: string,
+  ): Promise<User | null> {
+    const user = await this.userRepo.findOne({
+      where: {
+        email: email,
+      },
+      loadEagerRelations: false,
+    });
+    if (user && what == 'notexist') {
+      throw new ConflictException('Email already exist');
     }
-  }
-
-  async validateEmailExists(email: string): Promise<User> {
-    const user = await this.isEmailExist(email);
-    if (!user) {
+    if (!user && what == 'exist') {
       throw new NotFoundException('Email not found');
     }
     return user;

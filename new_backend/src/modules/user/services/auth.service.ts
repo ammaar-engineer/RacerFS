@@ -56,7 +56,7 @@ export class AuthService {
 
   async createRegisterSession(email: string): Promise<{ sessionId: string }> {
     // Validate email doesn't exist
-    await this.userValidation.validateEmailNotExists(email);
+    await this.userValidation.emailShouldBe('notexist', email);
 
     // Create auth session
     return await this.setAuthSession(email, 'register');
@@ -64,7 +64,7 @@ export class AuthService {
 
   async createLoginSession(email: string): Promise<{ sessionId: string }> {
     // Validate email exists
-    await this.userValidation.validateEmailExists(email);
+    await this.userValidation.emailShouldBe('exist', email);
 
     // Create auth session
     return await this.setAuthSession(email, 'login');

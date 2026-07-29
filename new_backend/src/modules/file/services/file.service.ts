@@ -1,9 +1,9 @@
 import { Inject, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import crypto from 'crypto';
+import { Repository } from 'typeorm';
 import type { RedisClientType } from '../../../connections/redis.module';
 import { REDIS_CLIENT } from '../../../connections/redis.module';
-import { Repository } from 'typeorm';
 import { File } from '../../../entities/file.entity';
 import { User } from '../../../entities/user.entity';
 import { BadRequestException, NotFoundException } from '../../../middleware/exceptions';
@@ -110,6 +110,7 @@ export class FileService {
     return await this.fileRepo.find({
       where: { user_id: userId },
       order: { uploaded_at: 'DESC' },
+      loadEagerRelations: false
     });
   }
 
@@ -119,6 +120,7 @@ export class FileService {
   async getFile(fileName: string, userId: number): Promise<File> {
     const file = await this.fileRepo.findOne({
       where: { name: fileName, user_id: userId },
+      loadEagerRelations: false,
     });
 
     if (!file) {
@@ -134,6 +136,7 @@ export class FileService {
   async getFileByKey(fileKey: string): Promise<File> {
     const file = await this.fileRepo.findOne({
       where: { file_key: fileKey },
+      loadEagerRelations: false,
     });
 
     if (!file) {
@@ -205,7 +208,10 @@ export class FileService {
     used_storage: number;
     available_storage: number;
   }> {
-    const user = await this.userRepo.findOne({ where: { id: userId } });
+    const user = await this.userRepo.findOne({
+      where: { id: userId },
+      loadEagerRelations: false,
+    });
 
     if (!user) {
       throw new NotFoundException('User not found');
@@ -235,7 +241,7 @@ export class FileService {
     user_id: number;
   }): Promise<File> {
     const file = this.fileRepo.create(data);
-    await this.fileRepo.save(file);
+    await this.fileRepo.save(file, { reload: false });
     await this.updateUserStorage(data.user_id, data.size);
     return file;
   }
@@ -249,7 +255,10 @@ export class FileService {
   }
 
   private async updateUserStorage(userId: number, sizeChange: number): Promise<void> {
-    const user = await this.userRepo.findOne({ where: { id: userId } });
+    const user = await this.userRepo.findOne({
+      where: { id: userId },
+      loadEagerRelations: false,
+    });
 
     if (!user) {
       throw new NotFoundException('User not found');
@@ -260,7 +269,10 @@ export class FileService {
   }
 
   private async checkStorageAvailability(userId: number, fileSize: number): Promise<void> {
-    const user = await this.userRepo.findOne({ where: { id: userId } });
+    const user = await this.userRepo.findOne({
+      where: { id: userId },
+      loadEagerRelations: false,
+    });
 
     if (!user) {
       throw new NotFoundException('User not found');

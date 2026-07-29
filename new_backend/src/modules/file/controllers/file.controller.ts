@@ -3,13 +3,15 @@ import {
   Controller,
   Delete,
   Get,
-  Headers,
   Patch,
   Post,
   Query,
+  UseGuards,
 } from '@nestjs/common';
 import { ApiTags } from '@nestjs/swagger';
 import { ApiDocs } from '../../../decorators/api-docs.decorator';
+import { CurrentToken } from '../../../decorators/current-token.decorator';
+import { AccountTokenAuthGuard } from '../../../middleware/account-token-auth.guard';
 import { SuccessResponse } from '../../../utilities/success.response';
 import {
   ConfirmUploadDto,
@@ -20,7 +22,6 @@ import {
   SetVisibilityDto,
 } from '../dto';
 import { FileService } from '../services/file.service';
-import { FileValidation } from '../validations/file.validation';
 import { TokenValidation } from '../validations/token.validation';
 import {
   confirmUploadDocs,
@@ -35,34 +36,31 @@ import {
 
 @ApiTags('file')
 @Controller('file')
+@UseGuards(AccountTokenAuthGuard) // ✅ Apply account token authentication to all endpoints
 export class FileController {
   constructor(
     private readonly fileService: FileService,
     private readonly tokenValidation: TokenValidation,
-    private readonly fileValidation: FileValidation,
   ) {}
 
   @ApiDocs(listFilesDocs)
   @Get('list')
-  async getFileList(@Headers('authorization') authToken: string) {
-    const { user_id } = this.tokenValidation.isValidAccountToken(authToken);
-    const files = await this.fileService.getUserFiles(user_id);
+  async getFileList(@CurrentToken('user_id') userId: number) {
+    const files = await this.fileService.getUserFiles(userId);
     return SuccessResponse('File list retrieved successfully', { files });
   }
 
   @ApiDocs({ ...downloadFileDocs, bodyType: DownloadFileDto })
   @Get('download')
   async downloadFile(
-    @Headers('authorization') authToken: string,
+    @CurrentToken('user_id') userId: number,
     @Query() query: DownloadFileDto,
   ) {
-    const { user_id } = this.tokenValidation.isValidAccountToken(authToken);
-
     // Verify ownership
-    await this.tokenValidation.isOwnerAction(user_id, query.fileName);
+    await this.tokenValidation.isOwnerAction(userId, query.fileName);
 
     // Get file
-    const file = await this.fileService.getFile(query.fileName, user_id);
+    const file = await this.fileService.getFile(query.fileName, userId);
 
     // Get presigned download URL
     const downloadUrl = await this.fileService.getPresignedDownloadUrl(
@@ -82,13 +80,11 @@ export class FileController {
   @ApiDocs({ ...uploadUrlDocs, bodyType: GetPresignedUploadDto })
   @Get('upload-url')
   async getPresignedUploadUrl(
-    @Headers('authorization') authToken: string,
+    @CurrentToken('user_id') userId: number,
     @Query() query: GetPresignedUploadDto,
   ) {
-    const { user_id } = this.tokenValidation.isValidAccountToken(authToken);
-
     const uploadData = await this.fileService.getPresignedUploadUrl(
-      user_id,
+      userId,
       query.fileName,
       query.fileSize,
     );
@@ -99,16 +95,14 @@ export class FileController {
   @ApiDocs({ ...confirmUploadDocs, bodyType: ConfirmUploadDto })
   @Post('confirm-upload')
   async confirmUpload(
-    @Headers('authorization') authToken: string,
+    @CurrentToken('user_id') userId: number,
     @Body() body: ConfirmUploadDto,
   ) {
-    const { user_id } = this.tokenValidation.isValidAccountToken(authToken);
-
     const file = await this.fileService.confirmUpload(
       body.status,
       body.fileName,
       body.fileKey,
-      user_id,
+      userId,
       body.fileSize,
     );
 
@@ -130,16 +124,14 @@ export class FileController {
   @ApiDocs({ ...renameFileDocs, bodyType: RenameFileDto })
   @Patch('rename')
   async renameFile(
-    @Headers('authorization') authToken: string,
+    @CurrentToken('user_id') userId: number,
     @Body() body: RenameFileDto,
   ) {
-    const { user_id } = this.tokenValidation.isValidAccountToken(authToken);
-
     // Verify ownership
-    await this.tokenValidation.isOwnerAction(user_id, body.fileName);
+    await this.tokenValidation.isOwnerAction(userId, body.fileName);
 
     const file = await this.fileService.renameFile(
-      user_id,
+      userId,
       body.fileName,
       body.newName,
     );
@@ -156,15 +148,13 @@ export class FileController {
   @ApiDocs({ ...deleteFileDocs, bodyType: DeleteFileDto })
   @Delete('delete')
   async deleteFile(
-    @Headers('authorization') authToken: string,
+    @CurrentToken('user_id') userId: number,
     @Body() body: DeleteFileDto,
   ) {
-    const { user_id } = this.tokenValidation.isValidAccountToken(authToken);
-
     // Verify ownership
-    await this.tokenValidation.isOwnerAction(user_id, body.fileName);
+    await this.tokenValidation.isOwnerAction(userId, body.fileName);
 
-    await this.fileService.deleteFile(user_id, body.fileName);
+    await this.fileService.deleteFile(userId, body.fileName);
 
     return SuccessResponse('File deleted successfully');
   }
@@ -172,16 +162,14 @@ export class FileController {
   @ApiDocs({ ...setVisibilityDocs, bodyType: SetVisibilityDto })
   @Patch('set-visibility')
   async setVisibility(
-    @Headers('authorization') authToken: string,
+    @CurrentToken('user_id') userId: number,
     @Body() body: SetVisibilityDto,
   ) {
-    const { user_id } = this.tokenValidation.isValidAccountToken(authToken);
-
     // Verify ownership
-    await this.tokenValidation.isOwnerAction(user_id, body.fileName);
+    await this.tokenValidation.isOwnerAction(userId, body.fileName);
 
     const file = await this.fileService.setFileVisibility(
-      user_id,
+      userId,
       body.fileName,
       body.isPublic,
     );
@@ -197,9 +185,8 @@ export class FileController {
 
   @ApiDocs(storageInfoDocs)
   @Get('storage-info')
-  async getStorageInfo(@Headers('authorization') authToken: string) {
-    const { user_id } = this.tokenValidation.isValidAccountToken(authToken);
-    const storageInfo = await this.fileService.getStorageInfo(user_id);
+  async getStorageInfo(@CurrentToken('user_id') userId: number) {
+    const storageInfo = await this.fileService.getStorageInfo(userId);
     return SuccessResponse('Storage info retrieved successfully', storageInfo);
   }
 }

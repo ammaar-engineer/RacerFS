@@ -4,15 +4,20 @@ import {
   Injectable,
   UnauthorizedException,
 } from '@nestjs/common';
-import type { JwtService } from 'src/services/jwt.service';
+import { JwtService } from '../services/jwt.service';
+import { AccountTokenPayload } from '../decorators/current-token.decorator';
 
-export interface AuthUser {
-  user_id: number;
-  type: string;
-}
-
+/**
+ * AccountTokenAuthGuard validates account tokens (JWT) from Authorization header
+ * and injects the decoded payload into request.token
+ *
+ * Usage:
+ *   @UseGuards(AccountTokenAuthGuard)
+ *   @Get('endpoint')
+ *   async method(@CurrentToken('user_id') userId: number) { ... }
+ */
 @Injectable()
-export class AuthGuard implements CanActivate {
+export class AccountTokenAuthGuard implements CanActivate {
   constructor(private readonly jwtService: JwtService) {}
 
   canActivate(context: ExecutionContext): boolean {
@@ -24,14 +29,14 @@ export class AuthGuard implements CanActivate {
     }
 
     try {
-      const payload = this.jwtService.verifyJwt<AuthUser>(authHeader);
+      const payload = this.jwtService.verifyJwt<AccountTokenPayload>(authHeader);
 
       if (payload.type !== 'account_token') {
         throw new UnauthorizedException('Invalid token type');
       }
 
-      // Attach user to request object
-      request.user = payload;
+      // Attach token payload to request object
+      request.token = payload;
 
       return true;
     } catch (error) {

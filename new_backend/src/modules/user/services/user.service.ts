@@ -37,9 +37,12 @@ export class UserService {
       };
     } else {
       // Get existing user
-      user = await this.userValidation.validateEmailExists(email);
+      const existingUser = await this.userValidation.emailShouldBe('exist', email);
+      if (!existingUser) {
+        throw new NotFoundException('User not found');
+      }
       return {
-        token: this.generateAccountToken(user.id),
+        token: this.generateAccountToken(existingUser.id),
         message: 'login successfully',
       };
     }
