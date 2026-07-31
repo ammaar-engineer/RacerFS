@@ -1,12 +1,12 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
+import { ObjectGlobalService } from 'src/services/object.service';
 import { Repository } from 'typeorm';
 import { User } from '../../../entities/user.entity';
+import { NotFoundException } from '../../../middleware/exceptions';
 import { JwtService } from '../../../services/jwt.service';
 import { AuthValidation } from '../validations/auth.validation';
 import { UserValidation } from '../validations/user.validation';
-import { FileService } from '../../file/services/file.service';
-import { NotFoundException } from '../../../middleware/exceptions';
 
 @Injectable()
 export class UserService {
@@ -14,9 +14,9 @@ export class UserService {
     @InjectRepository(User)
     private readonly userRepo: Repository<User>,
     private readonly jwtService: JwtService,
+    private readonly objectGlobalService: ObjectGlobalService,
     private readonly authValidation: AuthValidation,
     private readonly userValidation: UserValidation,
-    private readonly fileService: FileService,
   ) {}
 
   async verifyOtpAndAuthenticate(
@@ -87,7 +87,7 @@ export class UserService {
     // Delete files from MinIO storage
     if (user.files && user.files.length > 0) {
       const fileKeys = user.files.map((file) => file.file_key);
-      await this.fileService.removeObjects(fileKeys);
+      await this.objectGlobalService.removeObjects(fileKeys);
     }
 
     // Delete user (cascade will delete files from DB)

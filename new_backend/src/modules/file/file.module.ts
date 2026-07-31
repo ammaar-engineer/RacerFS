@@ -9,9 +9,9 @@ import { AccountTokenAuthGuard } from '../../middleware/account-token-auth.guard
 import { AccessTokenAuthGuard } from '../../middleware/access-token-auth.guard';
 import { FileController } from './controllers/file.controller';
 import { FileService } from './services/file.service';
-import { ObjectService } from './services/object.service';
 import { FileValidation } from './validations/file.validation';
 import { TokenValidation } from './validations/token.validation';
+import { FileOwnerGuard } from './guards/file-owner.guard';
 
 @Module({
   imports: [
@@ -20,7 +20,14 @@ import { TokenValidation } from './validations/token.validation';
     JwtModule,
   ],
   controllers: [FileController],
-  providers: [FileService, ObjectService, FileValidation, TokenValidation, AccountTokenAuthGuard, AccessTokenAuthGuard],
+  providers: [
+    FileService,
+    FileValidation,
+    TokenValidation,
+    AccountTokenAuthGuard,
+    AccessTokenAuthGuard,
+    FileOwnerGuard,
+  ],
   exports: [FileService],
 })
 export class FileModule {}

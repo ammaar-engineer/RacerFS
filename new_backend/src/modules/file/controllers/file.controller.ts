@@ -21,8 +21,8 @@ import {
   RenameFileDto,
   SetVisibilityDto,
 } from '../dto';
+import { FileOwnerGuard } from '../guards/file-owner.guard';
 import { FileService } from '../services/file.service';
-import { TokenValidation } from '../validations/token.validation';
 import {
   confirmUploadDocs,
   deleteFileDocs,
@@ -40,7 +40,6 @@ import {
 export class FileController {
   constructor(
     private readonly fileService: FileService,
-    private readonly tokenValidation: TokenValidation,
   ) {}
 
   @ApiDocs(listFilesDocs)
@@ -51,14 +50,12 @@ export class FileController {
   }
 
   @ApiDocs({ ...downloadFileDocs, bodyType: DownloadFileDto })
+  @UseGuards(FileOwnerGuard) // ✅ Validate file ownership
   @Get('download')
   async downloadFile(
     @CurrentToken('user_id') userId: number,
     @Query() query: DownloadFileDto,
   ) {
-    // Verify ownership
-    await this.tokenValidation.isOwnerAction(userId, query.fileName);
-
     // Get file
     const file = await this.fileService.getFile(query.fileName, userId);
 
@@ -122,14 +119,12 @@ export class FileController {
   }
 
   @ApiDocs({ ...renameFileDocs, bodyType: RenameFileDto })
+  @UseGuards(FileOwnerGuard) // ✅ Validate file ownership
   @Patch('rename')
   async renameFile(
     @CurrentToken('user_id') userId: number,
     @Body() body: RenameFileDto,
   ) {
-    // Verify ownership
-    await this.tokenValidation.isOwnerAction(userId, body.fileName);
-
     const file = await this.fileService.renameFile(
       userId,
       body.fileName,
@@ -146,28 +141,24 @@ export class FileController {
   }
 
   @ApiDocs({ ...deleteFileDocs, bodyType: DeleteFileDto })
+  @UseGuards(FileOwnerGuard) // ✅ Validate file ownership
   @Delete('delete')
   async deleteFile(
     @CurrentToken('user_id') userId: number,
     @Body() body: DeleteFileDto,
   ) {
-    // Verify ownership
-    await this.tokenValidation.isOwnerAction(userId, body.fileName);
-
     await this.fileService.deleteFile(userId, body.fileName);
 
     return SuccessResponse('File deleted successfully');
   }
 
   @ApiDocs({ ...setVisibilityDocs, bodyType: SetVisibilityDto })
+  @UseGuards(FileOwnerGuard) // ✅ Validate file ownership
   @Patch('set-visibility')
   async setVisibility(
     @CurrentToken('user_id') userId: number,
     @Body() body: SetVisibilityDto,
   ) {
-    // Verify ownership
-    await this.tokenValidation.isOwnerAction(userId, body.fileName);
-
     const file = await this.fileService.setFileVisibility(
       userId,
       body.fileName,

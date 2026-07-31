@@ -2,26 +2,26 @@ import { Body, Controller, Delete, Get, Headers, Post } from '@nestjs/common';
 import { ApiTags } from '@nestjs/swagger';
 
 // DTOs
-import { UserRegisterDto } from '../dto/user-register.dto';
-import { UserLoginDto } from '../dto/user-login.dto';
-import { VerifyOtpDto } from '../dto/verify-otp.dto';
 import { UserDeleteDto } from '../dto/user-delete.dto';
+import { UserLoginDto } from '../dto/user-login.dto';
+import { UserRegisterDto } from '../dto/user-register.dto';
+import { VerifyOtpDto } from '../dto/verify-otp.dto';
 
 // Services
 import { AuthService } from '../services/auth.service';
 import { UserService } from '../services/user.service';
 
 // Utilities
-import { SuccessResponse } from '../../../utilities/success.response';
 import { ApiDocs } from '../../../decorators/api-docs.decorator';
+import { SuccessResponse } from '../../../utilities/success.response';
 
 // Docs
 import {
-  registerDocs,
-  loginDocs,
-  verifyOtpDocs,
-  deleteAccountDocs,
   createTestAccountDocs,
+  deleteAccountDocs,
+  loginDocs,
+  registerDocs,
+  verifyOtpDocs,
 } from './docs';
 
 @ApiTags('user')
@@ -36,7 +36,7 @@ export class UserController {
   @Post('register')
   async register(@Body() dto: UserRegisterDto) {
     const { sessionId } = await this.authService.createRegisterSession(dto.email);
-    return SuccessResponse('OTP has been sent to your email', { sessionId });
+    return SuccessResponse('OTP has been sent to your email', { sessionId }); 
   }
 
   @ApiDocs({ ...loginDocs, bodyType: UserLoginDto })

@@ -1,12 +1,11 @@
 import { Inject, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
-import * as Minio from 'minio';
 import { REDIS_CLIENT } from '../../../connections/redis.module';
 import type { RedisClientType } from '../../../connections/redis.module';
-import { MINIO_CLIENT } from '../../../connections/minio.module';
 import { File } from '../../../entities/file.entity';
 import { Token } from '../../../entities/token.entity';
+import { ObjectGlobalService } from '../../../services/object.service';
 import {
   BadRequestException,
   ConflictException,
@@ -17,25 +16,22 @@ import {
 @Injectable()
 export class FileValidation {
   constructor(
-    @Inject(MINIO_CLIENT)
-    private readonly minioClient: Minio.Client,
     @InjectRepository(File)
     private readonly fileRepo: Repository<File>,
     @InjectRepository(Token)
     private readonly tokenRepo: Repository<Token>,
     @Inject(REDIS_CLIENT)
     private readonly redisClient: RedisClientType,
+    private readonly objectGlobalService: ObjectGlobalService,
   ) {}
 
   async validateFileSize(fileKey: string, expectedSize: number): Promise<number> {
-    const bucket = process.env.MINIO_BUCKET || 'racerfs-bucket';
-
     try {
-      const stat = await this.minioClient.statObject(bucket, fileKey);
+      const stat = await this.objectGlobalService.statObject(fileKey);
 
       if (stat.size !== expectedSize) {
         // Remove the file if size doesn't match
-        await this.minioClient.removeObject(bucket, fileKey);
+        await this.objectGlobalService.removeObject(fileKey);
         throw new BadRequestException('File size mismatch');
       }
 

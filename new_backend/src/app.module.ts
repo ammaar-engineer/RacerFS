@@ -9,6 +9,7 @@ import { EmailModule } from './connections/email.module';
 
 // Services
 import { JwtModule } from './services/jwt.service';
+import { ObjectGlobalModule } from './services/object.service';
 // TokenModule is not needed in app.module since it's already @Global()
 
 // Feature Modules
@@ -33,6 +34,7 @@ import { PaymentModule } from './modules/payment/payment.module';
 
     // Shared Services
     JwtModule, // JWT authentication
+    ObjectGlobalModule, // MinIO object storage operations
     // TokenModule is @Global(), automatically available
 
     // Feature Modules

@@ -1,24 +1,31 @@
 import { Inject, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import crypto from 'crypto';
+import * as Minio from 'minio';
 import { Repository } from 'typeorm';
+import { MINIO_CLIENT } from '../../../connections/minio.module';
 import type { RedisClientType } from '../../../connections/redis.module';
 import { REDIS_CLIENT } from '../../../connections/redis.module';
 import { File } from '../../../entities/file.entity';
 import { User } from '../../../entities/user.entity';
 import { BadRequestException, NotFoundException } from '../../../middleware/exceptions';
+import { ObjectGlobalService } from '../../../services/object.service';
 import { FileValidation } from '../validations/file.validation';
-import { ObjectService } from './object.service';
 
 @Injectable()
 export class FileService {
+  private readonly bucket: string;
+
   constructor(
     @InjectRepository(File) private readonly fileRepo: Repository<File>,
     @InjectRepository(User) private readonly userRepo: Repository<User>,
     @Inject(REDIS_CLIENT) private readonly redisClient: RedisClientType,
+    @Inject(MINIO_CLIENT) private readonly minioClient: Minio.Client,
     private readonly fileValidation: FileValidation,
-    private readonly objectService: ObjectService,
-  ) {}
+    private readonly objectGlobalService: ObjectGlobalService,
+  ) {
+    this.bucket = process.env.MINIO_BUCKET || 'racerfs-bucket';
+  }
 
   /**
    * Create upload session in Redis
@@ -68,7 +75,7 @@ export class FileService {
       });
     } else {
       // Remove failed upload from object storage
-      await this.objectService.removeObject(fileKey);
+      await this.objectGlobalService.removeObject(fileKey);
       return null;
     }
   }
@@ -90,28 +97,44 @@ export class FileService {
     // Create upload session
     const { fileKey } = await this.createUploadSession(userId, fileName, fileSize);
 
-    // Generate presigned POST policy via ObjectService
-    const { url, formData } = await this.objectService.getPresignedUploadUrl(fileKey, fileSize);
+    // Generate presigned POST policy
+    const policy = this.minioClient.newPostPolicy();
+    policy.setBucket(this.bucket);
+    policy.setKey(fileKey);
+    policy.setExpires(new Date(Date.now() + 7200 * 1000));
+    policy.setContentLengthRange(0, fileSize);
 
-    return { url, formData, fileKey };
+    const { postURL, formData } = await this.minioClient.presignedPostPolicy(policy);
+
+    return { url: postURL, formData, fileKey };
   }
 
   /**
-   * Get presigned download URL
+   * Get presigned download URL (1 hour expiry)
    */
   async getPresignedDownloadUrl(fileKey: string): Promise<string> {
-    return await this.objectService.getPresignedDownloadUrl(fileKey);
+    try {
+      return await this.minioClient.presignedGetObject(this.bucket, fileKey, 3600);
+    } catch (error) {
+      throw new NotFoundException('File not found in storage');
+    }
   }
 
   /**
    * Get user's file list
    */
-  async getUserFiles(userId: number): Promise<File[]> {
-    return await this.fileRepo.find({
+  async getUserFiles(userId: number) {
+    const files = await this.fileRepo.find({
       where: { user_id: userId },
       order: { uploaded_at: 'DESC' },
       loadEagerRelations: false
     });
+    return files.map(data => ({
+      name: data.name,
+      size: data.size,
+      type: data.file_type,
+      uploaded_at: data.uploaded_at
+    }))
   }
 
   /**
@@ -175,7 +198,7 @@ export class FileService {
     }
 
     // Remove from object storage
-    await this.objectService.removeObject(file.file_key);
+    await this.objectGlobalService.removeObject(file.file_key);
 
     // Update user storage quota
     await this.updateUserStorage(userId, -file.size);
@@ -228,7 +251,7 @@ export class FileService {
    * Remove multiple files from object storage (used by UserService on account deletion)
    */
   async removeObjects(fileKeys: string[]): Promise<void> {
-    await this.objectService.removeObjects(fileKeys);
+    await this.objectGlobalService.removeObjects(fileKeys);
   }
 
   // ─── Private Helpers ──────────────────────────────────────────────────────
