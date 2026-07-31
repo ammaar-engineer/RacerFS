@@ -1,9 +1,9 @@
 import { ArgumentsHost, Catch, HttpException } from '@nestjs/common';
-import { BaseExceptionFilter } from '@nestjs/core';
 import { ConfigService } from '@nestjs/config';
-import { BaseException } from './exceptions';
+import { BaseExceptionFilter } from '@nestjs/core';
 import { Response } from 'express';
 import { static_output_types } from '../types/static_output_types';
+import { BaseException } from './exceptions';
 
 @Catch()
 export class GlobalExceptionFilter extends BaseExceptionFilter {
@@ -31,6 +31,7 @@ export class GlobalExceptionFilter extends BaseExceptionFilter {
         stack: exception?.stack,
         exceptionType: exception?.constructor?.name ?? typeof exception,
       };
+      console.log(ServerOutput)
     }
 
     if (exception instanceof BaseException) {

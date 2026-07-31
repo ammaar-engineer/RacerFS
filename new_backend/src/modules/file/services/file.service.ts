@@ -130,6 +130,7 @@ export class FileService {
       loadEagerRelations: false
     });
     return files.map(data => ({
+      id: data.id,
       name: data.name,
       size: data.size,
       type: data.file_type,

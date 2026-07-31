@@ -1,0 +1,1 @@
+{"version":3,"file":"select.option.d.ts","sourceRoot":"","sources":["../../src/main_components/select.option.ts"],"names":[],"mappings":"AAEA,UAAU,WAAW;IACjB,KAAK,EAAE,MAAM,CAAC;IACd,MAAM,EAAE,MAAM,GAAG,GAAG,OAAO,CAAC,GAAG,CAAC,CAAA;CACnC;AAED,wBAAsB,kBAAkB,CAAC,KAAK,EAAE,MAAM,EAAE,GAAG,EAAE,WAAW,EAAE,iBAczE"}
