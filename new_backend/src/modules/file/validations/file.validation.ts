@@ -1,17 +1,17 @@
 import { Inject, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
-import { REDIS_CLIENT } from '../../../connections/redis.module';
 import type { RedisClientType } from '../../../connections/redis.module';
+import { REDIS_CLIENT } from '../../../connections/redis.module';
 import { File } from '../../../entities/file.entity';
 import { Token } from '../../../entities/token.entity';
-import { ObjectGlobalService } from '../../../services/object.service';
 import {
   BadRequestException,
   ConflictException,
   NotFoundException,
   UnauthorizedException,
 } from '../../../middleware/exceptions';
+import { ObjectGlobalService } from '../../../services/object.service';
 
 @Injectable()
 export class FileValidation {
@@ -69,7 +69,7 @@ export class FileValidation {
     }
 
     // Validate file size matches
-    if (session.file_size !== fileSize) {
+    if (session.file_size != fileSize) {
       throw new BadRequestException('File size mismatch');
     }
 

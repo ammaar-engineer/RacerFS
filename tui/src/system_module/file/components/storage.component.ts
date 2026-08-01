@@ -21,9 +21,8 @@ export async function storageInfoComponent(): Promise<void> {
 
   console.log('')
   console.log(chalk.bold('Storage Info'))
-  console.log(`  ${progressBar(info.used, info.total)}`)
-  console.log(`  Used  : ${chalk.yellow(formatBytes(info.used))} / ${formatBytes(info.total)}`)
-  console.log(`  Free  : ${chalk.green(formatBytes(info.total - info.used))}`)
-  console.log(`  Files : ${chalk.white(info.file_count)}`)
+  console.log(`  ${progressBar(info.used_storage, info.total_storage)}`)
+  console.log(`  Used      : ${chalk.yellow(formatBytes(info.used_storage))} / ${formatBytes(info.total_storage)}`)
+  console.log(`  Available : ${chalk.green(formatBytes(info.available_storage))}`)
   console.log('')
 }

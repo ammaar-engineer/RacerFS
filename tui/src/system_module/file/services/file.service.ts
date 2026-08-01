@@ -17,9 +17,9 @@ export interface FileItem {
 }
 
 export interface StorageInfo {
-  used: number
-  total: number
-  file_count: number
+  total_storage: number
+  used_storage: number
+  available_storage: number
 }
 
 export interface LocalFile {
