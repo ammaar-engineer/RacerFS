@@ -7,8 +7,11 @@ import { MINIO_CLIENT } from '../../../connections/minio.module';
 import type { RedisClientType } from '../../../connections/redis.module';
 import { REDIS_CLIENT } from '../../../connections/redis.module';
 import { File } from '../../../entities/file.entity';
+import { TokenType } from '../../../entities/token-type.enum';
+import { Token } from '../../../entities/token.entity';
 import { User } from '../../../entities/user.entity';
-import { BadRequestException, NotFoundException } from '../../../middleware/exceptions';
+import { BadRequestException, ForbiddenException, NotFoundException, UnauthorizedException } from '../../../middleware/exceptions';
+import { JwtService } from '../../../services/jwt.service';
 import { ObjectGlobalService } from '../../../services/object.service';
 import { FileValidation } from '../validations/file.validation';
 
@@ -19,10 +22,12 @@ export class FileService {
   constructor(
     @InjectRepository(File) private readonly fileRepo: Repository<File>,
     @InjectRepository(User) private readonly userRepo: Repository<User>,
+    @InjectRepository(Token) private readonly tokenRepo: Repository<Token>,
     @Inject(REDIS_CLIENT) private readonly redisClient: RedisClientType,
     @Inject(MINIO_CLIENT) private readonly minioClient: Minio.Client,
     private readonly fileValidation: FileValidation,
     private readonly objectGlobalService: ObjectGlobalService,
+    private readonly jwtService: JwtService,
   ) {
     this.bucket = process.env.MINIO_BUCKET || 'racerfs-bucket';
   }
@@ -136,6 +141,26 @@ export class FileService {
       type: data.file_type,
       uploaded_at: data.uploaded_at
     }))
+  }
+
+  /**
+   * Get public files only for a specific user
+   * Used by /file/public-list endpoint with access token
+   */
+  async getPublicFiles(userId: number) {
+    const files = await this.fileRepo.find({
+      where: { user_id: userId, is_public: true },
+      order: { uploaded_at: 'DESC' },
+      loadEagerRelations: false
+    });
+
+    return files.map(data => ({
+      id: data.id,
+      name: data.name,
+      size: data.size,
+      type: data.file_type,
+      uploaded_at: data.uploaded_at
+    }));
   }
 
   /**
@@ -253,6 +278,73 @@ export class FileService {
    */
   async removeObjects(fileKeys: string[]): Promise<void> {
     await this.objectGlobalService.removeObjects(fileKeys);
+  }
+
+  // ─── Access Token ─────────────────────────────────────────────────────────
+
+  /**
+   * Create a file access token for the user
+   * Token is a JWT containing { user_id, type: 'file_access_token' }
+   * Also saved to DB as whitelist for revocation capability
+   */
+  async createAccessToken(userId: number): Promise<Token> {
+    // Generate JWT token
+    const tokenString = this.jwtService.generateJwt(
+      {
+        user_id: userId,
+        type: TokenType.file_access_token,
+      },
+      99999, // No expiry (permanent until deleted)
+    );
+
+    // Save to DB as whitelist
+    const token = this.tokenRepo.create({
+      token: tokenString,
+      user_id: userId,
+      type: TokenType.file_access_token,
+    });
+    return await this.tokenRepo.save(token);
+  }
+
+  /**
+   * Delete a file access token — only the owner can delete their own token
+   */
+  async deleteAccessToken(userId: number, tokenString: string): Promise<void> {
+    const tokenData = await this.tokenRepo.findOne({
+      where: { token: tokenString, type: TokenType.file_access_token },
+    });
+
+    if (!tokenData) {
+      throw new NotFoundException('Access token not found');
+    }
+
+    if (tokenData.user_id !== userId) {
+      throw new UnauthorizedException('Unauthorized action');
+    }
+
+    await this.tokenRepo.delete({ id: tokenData.id });
+  }
+
+  /**
+   * Get all file access tokens belonging to a user
+   */
+  async getUserAccessTokens(userId: number): Promise<Token[]> {
+    return await this.tokenRepo.find({
+      where: { user_id: userId, type: TokenType.file_access_token },
+    });
+  }
+
+  /**
+   * Get a public file — throws ForbiddenException if file is not public
+   */
+  async getPublicFile(fileName: string, userId: number): Promise<File> {
+    const file = await this.getFile(fileName, userId);
+
+    if (!file.is_public) {
+      throw new ForbiddenException('File is not public');
+    }
+
+    return file;
   }
 
   // ─── Private Helpers ──────────────────────────────────────────────────────

@@ -101,8 +101,10 @@ class FileService {
         headers: { authorization: token },
         params: { fileName, fileSize }
       })
+      console.log(BACKEND_URL)
       return res.data.data
     } catch (error: any) {
+      console.log(error)
       this.handleError(error, 'Failed to get upload URL')
     }
   }
@@ -186,6 +188,29 @@ class FileService {
       )
     } catch (error: any) {
       this.handleError(error, 'Failed to set visibility')
+    }
+  }
+
+  async getPublicList(accessToken: string): Promise<FileItem[]> {
+    try {
+      const res = await axios.get(`${BACKEND_URL}/file/public-list`, {
+        headers: { 'access-token': accessToken }
+      })
+      return res.data.data.files
+    } catch (error: any) {
+      this.handleError(error, 'Failed to get public file list')
+    }
+  }
+
+  async getPublicDownloadURL(fileName: string, accessToken: string): Promise<{ url: string; file: { name: string; size: number; type: string } }> {
+    try {
+      const res = await axios.get(`${BACKEND_URL}/file/public-download`, {
+        headers: { 'access-token': accessToken },
+        params: { fileName }
+      })
+      return res.data.data
+    } catch (error: any) {
+      this.handleError(error, 'Failed to get public download URL')
     }
   }
 

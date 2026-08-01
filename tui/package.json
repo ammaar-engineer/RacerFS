@@ -1,5 +1,5 @@
 {
-  "name": "racerfs-tui",
+  "name": "racerfs-tui-new",
   "version": "1.0.0",
   "description": "",
   "main": "./dist/main.js",
@@ -10,7 +10,7 @@
     "prepack": "npm run build"
   },
   "bin": {
-    "racer-fs": "./dist/main.js"
+    "racer-fs-new": "./dist/main.js"
   },
   "files": [
     "dist"

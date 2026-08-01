@@ -1,0 +1,1 @@
+{"version":3,"file":"selector.service.d.ts","sourceRoot":"","sources":["../../src/system_services/selector.service.ts"],"names":[],"mappings":"AAEA,UAAU,YAAY;IACpB,KAAK,EAAE,MAAM,CAAA;IACb,MAAM,EAAE,MAAM,OAAO,CAAC,IAAI,CAAC,CAAA;CAC5B;AAED;;GAEG;AACH,wBAAsB,kBAAkB,CACtC,OAAO,EAAE,MAAM,EACf,OAAO,EAAE,YAAY,EAAE,GACtB,OAAO,CAAC,IAAI,CAAC,CAoBf"}

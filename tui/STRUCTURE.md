@@ -4,6 +4,10 @@ src/
 │   │   ├── handler.ts
 │   │   ├── services
 │   │   └── validations
+|    |        └── auth_sub_option
+|    |        ├── handler.ts
+|    |        ├── services
+|    |        ├── validations
 │   └── file/
 │       ├── handler.ts
 │       ├── services

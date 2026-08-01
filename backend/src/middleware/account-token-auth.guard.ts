@@ -34,6 +34,7 @@ export class AccountTokenAuthGuard implements CanActivate {
       if (payload.type !== 'account_token') {
         throw new UnauthorizedException('Invalid token type');
       }
+
       // Attach token payload to request object
       request.token = payload;
 

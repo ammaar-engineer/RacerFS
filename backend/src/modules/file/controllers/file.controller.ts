@@ -11,10 +11,13 @@ import {
 import { ApiTags } from '@nestjs/swagger';
 import { ApiDocs } from '../../../decorators/api-docs.decorator';
 import { CurrentToken } from '../../../decorators/current-token.decorator';
+import { AccessTokenAuthGuard } from '../../../middleware/access-token-auth.guard';
 import { AccountTokenAuthGuard } from '../../../middleware/account-token-auth.guard';
 import { SuccessResponse } from '../../../utilities/success.response';
 import {
   ConfirmUploadDto,
+  CreateAccessTokenDto,
+  DeleteAccessTokenDto,
   DeleteFileDto,
   DownloadFileDto,
   GetPresignedUploadDto,
@@ -25,9 +28,14 @@ import { FileOwnerGuard } from '../guards/file-owner.guard';
 import { FileService } from '../services/file.service';
 import {
   confirmUploadDocs,
+  createAccessTokenDocs,
+  deleteAccessTokenDocs,
   deleteFileDocs,
   downloadFileDocs,
+  listAccessTokensDocs,
   listFilesDocs,
+  publicDownloadDocs,
+  publicListFilesDocs,
   renameFileDocs,
   setVisibilityDocs,
   storageInfoDocs,
@@ -36,12 +44,12 @@ import {
 
 @ApiTags('file')
 @Controller('file')
-@UseGuards(AccountTokenAuthGuard) // ✅ Apply account token authentication to all endpoints
 export class FileController {
   constructor(
     private readonly fileService: FileService,
   ) {}
 
+  @UseGuards(AccountTokenAuthGuard)
   @ApiDocs(listFilesDocs)
   @Get('list')
   async getFileList(@CurrentToken('user_id') userId: number) {
@@ -49,8 +57,8 @@ export class FileController {
     return SuccessResponse('File list retrieved successfully', { files });
   }
 
+  @UseGuards(AccountTokenAuthGuard, FileOwnerGuard)
   @ApiDocs({ ...downloadFileDocs, bodyType: DownloadFileDto })
-  @UseGuards(FileOwnerGuard) // ✅ Validate file ownership
   @Get('download')
   async downloadFile(
     @CurrentToken('user_id') userId: number,
@@ -75,6 +83,7 @@ export class FileController {
     });
   }
 
+  @UseGuards(AccountTokenAuthGuard)
   @ApiDocs({ ...uploadUrlDocs, bodyType: GetPresignedUploadDto })
   @Get('upload-url')
   async getPresignedUploadUrl(
@@ -90,6 +99,7 @@ export class FileController {
     return SuccessResponse('Upload URL generated', uploadData);
   }
 
+  @UseGuards(AccountTokenAuthGuard)
   @ApiDocs({ ...confirmUploadDocs, bodyType: ConfirmUploadDto })
   @Post('confirm-upload')
   async confirmUpload(
@@ -119,8 +129,8 @@ export class FileController {
     }
   }
 
+  @UseGuards(AccountTokenAuthGuard, FileOwnerGuard)
   @ApiDocs({ ...renameFileDocs, bodyType: RenameFileDto })
-  @UseGuards(FileOwnerGuard) // ✅ Validate file ownership
   @Patch('rename')
   async renameFile(
     @CurrentToken('user_id') userId: number,
@@ -141,8 +151,8 @@ export class FileController {
     });
   }
 
+  @UseGuards(AccountTokenAuthGuard, FileOwnerGuard)
   @ApiDocs({ ...deleteFileDocs, bodyType: DeleteFileDto })
-  @UseGuards(FileOwnerGuard) // ✅ Validate file ownership
   @Delete('delete')
   async deleteFile(
     @CurrentToken('user_id') userId: number,
@@ -153,8 +163,8 @@ export class FileController {
     return SuccessResponse('File deleted successfully');
   }
 
+  @UseGuards(AccountTokenAuthGuard, FileOwnerGuard)
   @ApiDocs({ ...setVisibilityDocs, bodyType: SetVisibilityDto })
-  @UseGuards(FileOwnerGuard) // ✅ Validate file ownership
   @Patch('set-visibility')
   async setVisibility(
     @CurrentToken('user_id') userId: number,
@@ -175,10 +185,83 @@ export class FileController {
     });
   }
 
+  @UseGuards(AccountTokenAuthGuard)
   @ApiDocs(storageInfoDocs)
   @Get('storage-info')
   async getStorageInfo(@CurrentToken('user_id') userId: number) {
     const storageInfo = await this.fileService.getStorageInfo(userId);
     return SuccessResponse('Storage info retrieved successfully', storageInfo);
+  }
+
+  // ─── Access Token Endpoints ───────────────────────────────────────────────
+
+  @UseGuards(AccountTokenAuthGuard)
+  @ApiDocs({ ...createAccessTokenDocs, bodyType: CreateAccessTokenDto })
+  @Post('access-token')
+  async createAccessToken(
+    @CurrentToken('user_id') userId: number,
+    @Body() body: CreateAccessTokenDto,
+  ) {
+    const {token} = await this.fileService.createAccessToken(userId);
+
+    return SuccessResponse('Access token created successfully', {
+      token
+    });
+  }
+
+  @UseGuards(AccountTokenAuthGuard)
+  @ApiDocs({ ...deleteAccessTokenDocs, bodyType: DeleteAccessTokenDto })
+  @Delete('access-token')
+  async deleteAccessToken(
+    @CurrentToken('user_id') userId: number,
+    @Body() body: DeleteAccessTokenDto,
+  ) {
+    await this.fileService.deleteAccessToken(userId, body.token);
+
+    return SuccessResponse('Access token deleted successfully');
+  }
+
+  @UseGuards(AccountTokenAuthGuard)
+  @ApiDocs(listAccessTokensDocs)
+  @Get('access-tokens')
+  async listAccessTokens(@CurrentToken('user_id') userId: number) {
+    const tokens = await this.fileService.getUserAccessTokens(userId);
+
+    return SuccessResponse('Access tokens retrieved successfully', {
+      tokens: tokens.map((t) => t.token),
+    });
+  }
+
+  @UseGuards(AccessTokenAuthGuard)
+  @ApiDocs({ ...publicDownloadDocs, bodyType: DownloadFileDto })
+  @Get('public-download')
+  async publicDownloadFile(
+    @CurrentToken('user_id') userId: number,
+    @Query() query: DownloadFileDto,
+  ) {
+    // Get public file only
+    const file = await this.fileService.getPublicFile(query.fileName, userId);
+
+    // Get presigned download URL
+    const downloadUrl = await this.fileService.getPresignedDownloadUrl(
+      file.file_key,
+    );
+
+    return SuccessResponse('Download URL generated', {
+      url: downloadUrl,
+      file: {
+        name: file.name,
+        size: file.size,
+        type: file.file_type,
+      },
+    });
+  }
+
+  @UseGuards(AccessTokenAuthGuard)
+  @ApiDocs(publicListFilesDocs)
+  @Get('public-list')
+  async getPublicFileList(@CurrentToken('user_id') userId: number) {
+    const files = await this.fileService.getPublicFiles(userId);
+    return SuccessResponse('Public files retrieved successfully', { files });
   }
 }

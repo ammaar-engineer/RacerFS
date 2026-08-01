@@ -7,6 +7,7 @@ import { createSelectOption } from './system_services/selector.service.js'
 import { LoginOrRegisterHandler } from './system_module/auth/handler.js'
 import { SnippetsHandler } from './system_module/snippet/handler.js'
 import { FilesHandler } from './system_module/file/handler.js'
+import { AccessTokenHandler } from './system_module/access_token/handler.js'
 import { testingHandler } from './system_module/testing/handler.js'
 
 InitRacerFS()
@@ -22,6 +23,7 @@ while (true) {
     { label: 'Login/Register', action: LoginOrRegisterHandler },
     { label: 'Manage snippets', action: SnippetsHandler },
     { label: 'Manage files', action: FilesHandler },
+    { label: 'Manage access tokens', action: AccessTokenHandler },
     { label: 'Storage Management', action: async () => console.log('Coming soon') },
     { label: 'Use AI Mode', action: async () => console.log('Coming soon') },
     { label: 'Testing', action: testingHandler },

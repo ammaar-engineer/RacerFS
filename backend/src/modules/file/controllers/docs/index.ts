@@ -6,3 +6,8 @@ export * from './rename-file.docs';
 export * from './delete-file.docs';
 export * from './set-visibility.docs';
 export * from './storage-info.docs';
+export * from './create-access-token.docs';
+export * from './delete-access-token.docs';
+export * from './list-access-tokens.docs';
+export * from './public-download.docs';
+export * from './public-list-files.docs';
