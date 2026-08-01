@@ -4,6 +4,7 @@ import { listSnippetComponent } from './components/list.component.js'
 import { createSnippetComponent } from './components/create.component.js'
 import { editSnippetComponent } from './components/edit.component.js'
 import { deleteSnippetComponent } from './components/delete.component.js'
+import { executeSnippetComponent } from './components/execute.component.js'
 
 export async function SnippetsHandler(): Promise<void> {
   if (!validation.isUserAuthenticated()) {
@@ -13,6 +14,7 @@ export async function SnippetsHandler(): Promise<void> {
 
   await createSelectOption('Manage Snippets', [
     { label: 'List Snippets', action: listSnippetComponent },
+    { label: 'Execute Snippet', action: executeSnippetComponent },
     { label: 'Create Snippet', action: createSnippetComponent },
     { label: 'Edit Snippet', action: editSnippetComponent },
     { label: 'Delete Snippet', action: deleteSnippetComponent },

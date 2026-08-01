@@ -39,6 +39,7 @@ class AccessTokenService {
     async list() {
         try {
             const token = this.getAuthToken();
+            console.log(token);
             const res = await axios.get(`${BACKEND_URL}/file/access-tokens`, {
                 headers: { authorization: token }
             });
