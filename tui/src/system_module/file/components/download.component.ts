@@ -24,15 +24,15 @@ export async function downloadFileComponent(): Promise<void> {
   })
   if (typeof selected !== 'string') return
 
-  // Get presigned download URL
+  // Get presigned download URL + file metadata
   console.log(chalk.dim('→ Getting download URL...'))
-  const downloadUrl = await fileService.getDownloadURL(selected)
+  const downloadData = await fileService.getDownloadURL(selected)
 
-  // Download via curl ke CWD
-  const outputPath = path.join(process.cwd(), selected)
-  console.log(chalk.dim(`→ Downloading to ${outputPath}...`))
+  // Download via curl ke CWD dengan nama asli dari backend
+  const outputPath = path.join(process.cwd(), downloadData.file.name)
+  console.log(chalk.dim(`→ Downloading ${downloadData.file.name} (${downloadData.file.type})...`))
 
-  const result = spawnSync('curl', ['-fsSL', '-o', outputPath, downloadUrl], {
+  const result = spawnSync('curl', ['-fsSL', '-o', outputPath, downloadData.url], {
     stdio: 'inherit'
   })
 

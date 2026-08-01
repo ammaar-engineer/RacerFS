@@ -1,5 +1,5 @@
 import type { DataSource } from 'typeorm';
-import { ConflictException } from '../middleware/exceptions';
+import { ConflictException } from '../CustomExceptionHandle';
 
 type RepositoryInstance = ReturnType<DataSource['getRepository']>;
 type SqliteErrorObjectKeys = 'SQLITE_CONSTRAINT_UNIQUE';
@@ -19,11 +19,11 @@ export async function SqliteHandle<P>(
       },
       ...(customConfig as any),
     };
-
+    
     if (errorCode && (SqliteErrorObject as any)[errorCode]) {
       (SqliteErrorObject as any)[errorCode]();
     }
-
+    
     throw err;
   }
 }

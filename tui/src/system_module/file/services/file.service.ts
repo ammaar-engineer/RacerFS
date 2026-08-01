@@ -121,7 +121,7 @@ class FileService {
     }
   }
 
-  async getDownloadURL(fileName: string): Promise<string> {
+  async getDownloadURL(fileName: string): Promise<{ url: string; file: { name: string; size: number; type: string } }> {
     try {
       const token = this.getAuthToken()
       const accessTokens = this.getAccessTokens()
@@ -132,12 +132,13 @@ class FileService {
         headers['access-token'] = firstToken
       }
 
-      const res = await axios.get(`${BACKEND_URL}/file/download-url`, {
+      const res = await axios.get(`${BACKEND_URL}/file/download`, {
         headers,
         params: { fileName }
       })
-      return res.data.data.url
+      return res.data.data
     } catch (error: any) {
+      console.log(error)
       this.handleError(error, 'Failed to get download URL')
     }
   }
