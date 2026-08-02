@@ -1,11 +1,15 @@
-import { select, text } from '@clack/prompts';
-import chalk from 'chalk';
+import { box, select, text } from '@clack/prompts';
 import { fileService } from '../services/file.service.js';
 export async function renameFileComponent() {
     // Fetch-first
     const files = await fileService.getList();
     if (files.length === 0) {
-        console.log(chalk.yellow('No files to rename'));
+        box('No files to rename', 'Rename', {
+            rounded: true,
+            width: 'auto',
+            contentAlign: 'center',
+            contentPadding: 4
+        });
         return;
     }
     const selected = await select({
@@ -31,6 +35,11 @@ export async function renameFileComponent() {
     if (typeof newName !== 'string')
         return;
     await fileService.rename(selected, newName);
-    console.log(chalk.green(`✓ '${selected}' renamed to '${newName}'`));
+    box(`'${selected}' renamed to '${newName}'`, 'Rename', {
+        rounded: true,
+        width: 'auto',
+        contentAlign: 'center',
+        contentPadding: 4
+    });
 }
 //# sourceMappingURL=rename.component.js.map

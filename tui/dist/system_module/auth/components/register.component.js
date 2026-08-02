@@ -1,4 +1,4 @@
-import { text } from '@clack/prompts';
+import { box, text } from '@clack/prompts';
 import chalk from 'chalk';
 import { authService } from '../services/auth.service.js';
 export async function registerComponent() {
@@ -34,6 +34,11 @@ export async function registerComponent() {
     // Step 4: Verify OTP and save token
     const token = await authService.verifyOTP(sessionId, otp);
     authService.saveToken(token);
-    console.log(chalk.green('✓ Registration successful'));
+    box(`Email: ${email}`, "Registration success", {
+        contentAlign: 'center',
+        width: 'auto',
+        rounded: true,
+        contentPadding: 4
+    });
 }
 //# sourceMappingURL=register.component.js.map

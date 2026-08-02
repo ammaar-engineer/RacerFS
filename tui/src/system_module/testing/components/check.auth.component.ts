@@ -1,4 +1,4 @@
-import chalk from 'chalk'
+import { box } from '@clack/prompts'
 import { validation } from '../../../system_validations/fs.validation.js'
 import { fsService } from '../../../system_services/fs.service.js'
 
@@ -10,10 +10,18 @@ export async function checkAuthComponent(): Promise<void> {
 
   if (isAuth) {
     const userData = fsService.readUserData()
-    console.log(chalk.green('✓ User is authenticated'))
-    console.log(chalk.dim(`  Token: ${userData?.account_token.substring(0, 20)}...`))
+    box(`Authenticated\nToken: ${userData?.account_token.substring(0, 20)}...`, 'Auth Status', {
+      rounded: true,
+      width: 'auto',
+      contentAlign: 'center',
+      contentPadding: 4
+    })
   } else {
-    console.log(chalk.red('✗ User is NOT authenticated'))
-    console.log(chalk.dim('  No token found in ~/.racerfs/user.rcfs'))
+    box('Not authenticated\nNo token found in ~/.racerfs/user.rcfs', 'Auth Status', {
+      rounded: true,
+      width: 'auto',
+      contentAlign: 'center',
+      contentPadding: 4
+    })
   }
 }

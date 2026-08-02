@@ -1,5 +1,4 @@
-import { text } from '@clack/prompts'
-import chalk from 'chalk'
+import { box, text } from '@clack/prompts'
 import { testingService } from '../services/testing.service.js'
 
 /**
@@ -20,6 +19,10 @@ export async function createTestAccountComponent(): Promise<void> {
   const token = await testingService.createTestAccount(email)
   testingService.saveToken(token)
 
-  console.log(chalk.green('✓ Test account created and token saved'))
-  console.log(chalk.dim(`  Email: ${email}`))
+  box(`Email: ${email}`, "Test account", {
+    rounded: true,
+    width: 'auto',
+    contentAlign: 'center',
+    contentPadding: 4
+  })
 }

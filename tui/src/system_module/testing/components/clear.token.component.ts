@@ -1,5 +1,4 @@
-import { select } from '@clack/prompts'
-import chalk from 'chalk'
+import { box, select } from '@clack/prompts'
 import { fsService } from '../../../system_services/fs.service.js'
 
 /**
@@ -7,7 +6,12 @@ import { fsService } from '../../../system_services/fs.service.js'
  */
 export async function clearTokenComponent(): Promise<void> {
   if (!fsService.userFileExists()) {
-    console.log(chalk.yellow('No token to clear'))
+    box('No token to clear', 'Clear Token', {
+      rounded: true,
+      width: 'auto',
+      contentAlign: 'center',
+      contentPadding: 4
+    })
     return
   }
 
@@ -21,6 +25,11 @@ export async function clearTokenComponent(): Promise<void> {
 
   if (confirm === 'yes') {
     fsService.deleteUserData()
-    console.log(chalk.green('✓ Token cleared'))
+    box('Token cleared', 'Clear Token', {
+      rounded: true,
+      width: 'auto',
+      contentAlign: 'center',
+      contentPadding: 4
+    })
   }
 }

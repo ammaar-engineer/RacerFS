@@ -1,4 +1,4 @@
-import { select } from '@clack/prompts'
+import { box, select } from '@clack/prompts'
 import chalk from 'chalk'
 import { spawn } from 'node:child_process'
 import { snippetService } from '../services/snippet.service.js'
@@ -8,7 +8,12 @@ export async function executeSnippetComponent(): Promise<void> {
   const snippets = await snippetService.getList()
 
   if (snippets.length === 0) {
-    console.log(chalk.yellow('No snippets to execute'))
+    box('No snippets to execute', 'Execute Snippet', {
+      rounded: true,
+      width: 'auto',
+      contentAlign: 'center',
+      contentPadding: 4
+    })
     return
   }
 
@@ -34,14 +39,29 @@ export async function executeSnippetComponent(): Promise<void> {
   })
 
   child.on('error', (err) => {
-    console.log(chalk.red(`✗ Failed to execute: ${err.message}`))
+    box(`Failed to execute: ${err.message}`, 'Execute Snippet', {
+      rounded: true,
+      width: 'auto',
+      contentAlign: 'center',
+      contentPadding: 4
+    })
   })
 
   child.on('close', (code) => {
     if (code === 0) {
-      console.log(chalk.green(`✓ Done (exit code ${code})`))
+      box(`Done (exit code ${code})`, 'Execute Snippet', {
+        rounded: true,
+        width: 'auto',
+        contentAlign: 'center',
+        contentPadding: 4
+      })
     } else {
-      console.log(chalk.red(`✗ Exited with code ${code}`))
+      box(`Exited with code ${code}`, 'Execute Snippet', {
+        rounded: true,
+        width: 'auto',
+        contentAlign: 'center',
+        contentPadding: 4
+      })
     }
   })
 

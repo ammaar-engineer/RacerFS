@@ -1,5 +1,4 @@
-import { select } from '@clack/prompts'
-import chalk from 'chalk'
+import { box, select } from '@clack/prompts'
 import { snippetService } from '../services/snippet.service.js'
 
 export async function deleteSnippetComponent(): Promise<void> {
@@ -7,7 +6,12 @@ export async function deleteSnippetComponent(): Promise<void> {
   const snippets = await snippetService.getList()
 
   if (snippets.length === 0) {
-    console.log(chalk.yellow('No snippets to delete'))
+    box('No snippets to delete', 'Delete Snippet', {
+      rounded: true,
+      width: 'auto',
+      contentAlign: 'center',
+      contentPadding: 4
+    })
     return
   }
 
@@ -35,5 +39,10 @@ export async function deleteSnippetComponent(): Promise<void> {
   if (confirm !== 'yes') return
 
   await snippetService.delete(selected)
-  console.log(chalk.green(`✓ Snippet '${selected}' deleted`))
+  box(`Snippet '${selected}' deleted`, 'Delete Snippet', {
+    rounded: true,
+    width: 'auto',
+    contentAlign: 'center',
+    contentPadding: 4
+  })
 }

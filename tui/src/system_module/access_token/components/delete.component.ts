@@ -1,4 +1,4 @@
-import { select } from '@clack/prompts'
+import { box, select } from '@clack/prompts'
 import chalk from 'chalk'
 import { accessTokenService } from '../services/access-token.service.js'
 
@@ -8,7 +8,12 @@ export async function deleteAccessTokenComponent(): Promise<void> {
   const tokens = await accessTokenService.list()
 
   if (tokens.length === 0) {
-    console.log(chalk.yellow('No access tokens available'))
+    box('No access tokens available', 'Delete Token', {
+      rounded: true,
+      width: 'auto',
+      contentAlign: 'center',
+      contentPadding: 4
+    })
     return
   }
 
@@ -25,5 +30,10 @@ export async function deleteAccessTokenComponent(): Promise<void> {
   console.log(chalk.dim('→ Deleting access token...'))
   await accessTokenService.delete(selected)
 
-  console.log(chalk.green('✓ Access token deleted successfully'))
+  box('Access token deleted successfully', 'Delete Token', {
+    rounded: true,
+    width: 'auto',
+    contentAlign: 'center',
+    contentPadding: 4
+  })
 }

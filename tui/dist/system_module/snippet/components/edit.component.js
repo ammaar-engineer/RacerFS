@@ -1,11 +1,15 @@
-import { select, text } from '@clack/prompts';
-import chalk from 'chalk';
+import { box, select, text } from '@clack/prompts';
 import { snippetService } from '../services/snippet.service.js';
 export async function editSnippetComponent() {
     // Fetch-first: ambil list dulu
     const snippets = await snippetService.getList();
     if (snippets.length === 0) {
-        console.log(chalk.yellow('No snippets to edit'));
+        box('No snippets to edit', 'Edit Snippet', {
+            rounded: true,
+            width: 'auto',
+            contentAlign: 'center',
+            contentPadding: 4
+        });
         return;
     }
     // Pilih snippet yang akan diedit
@@ -32,6 +36,11 @@ export async function editSnippetComponent() {
     if (typeof command !== 'string')
         return;
     await snippetService.edit(selected, command);
-    console.log(chalk.green(`✓ Snippet '${selected}' updated`));
+    box(`Snippet '${selected}' updated`, 'Edit Snippet', {
+        rounded: true,
+        width: 'auto',
+        contentAlign: 'center',
+        contentPadding: 4
+    });
 }
 //# sourceMappingURL=edit.component.js.map

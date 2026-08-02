@@ -1,4 +1,4 @@
-import { text } from '@clack/prompts';
+import { box, text } from '@clack/prompts';
 import chalk from 'chalk';
 import { authService } from '../services/auth.service.js';
 export async function loginComponent() {
@@ -34,6 +34,11 @@ export async function loginComponent() {
     // Step 4: Verify OTP and save token
     const token = await authService.verifyOTP(sessionId, otp);
     authService.saveToken(token);
-    console.log(chalk.green('✓ Login successful'));
+    box(`Logged in as ${email}`, 'Login', {
+        rounded: true,
+        width: 'auto',
+        contentAlign: 'center',
+        contentPadding: 4
+    });
 }
 //# sourceMappingURL=login.component.js.map

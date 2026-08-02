@@ -1,11 +1,15 @@
-import { select } from '@clack/prompts';
-import chalk from 'chalk';
+import { box, select } from '@clack/prompts';
 import { fileService } from '../services/file.service.js';
 export async function visibilityFileComponent() {
     // Fetch-first
     const files = await fileService.getList();
     if (files.length === 0) {
-        console.log(chalk.yellow('No files found'));
+        box('No files found', 'Visibility', {
+            rounded: true,
+            width: 'auto',
+            contentAlign: 'center',
+            contentPadding: 4
+        });
         return;
     }
     const selected = await select({
@@ -30,6 +34,11 @@ export async function visibilityFileComponent() {
     if (confirm !== 'yes')
         return;
     await fileService.setVisibility(selected, newVisibility);
-    console.log(chalk.green(`✓ '${selected}' is now ${newVisibility ? 'public' : 'private'}`));
+    box(`'${selected}' is now ${newVisibility ? 'public' : 'private'}`, 'Visibility', {
+        rounded: true,
+        width: 'auto',
+        contentAlign: 'center',
+        contentPadding: 4
+    });
 }
 //# sourceMappingURL=visibility.component.js.map

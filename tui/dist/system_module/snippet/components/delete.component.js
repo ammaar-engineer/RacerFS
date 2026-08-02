@@ -1,11 +1,15 @@
-import { select } from '@clack/prompts';
-import chalk from 'chalk';
+import { box, select } from '@clack/prompts';
 import { snippetService } from '../services/snippet.service.js';
 export async function deleteSnippetComponent() {
     // Fetch-first: ambil list dulu
     const snippets = await snippetService.getList();
     if (snippets.length === 0) {
-        console.log(chalk.yellow('No snippets to delete'));
+        box('No snippets to delete', 'Delete Snippet', {
+            rounded: true,
+            width: 'auto',
+            contentAlign: 'center',
+            contentPadding: 4
+        });
         return;
     }
     // Pilih snippet yang akan dihapus
@@ -30,6 +34,11 @@ export async function deleteSnippetComponent() {
     if (confirm !== 'yes')
         return;
     await snippetService.delete(selected);
-    console.log(chalk.green(`✓ Snippet '${selected}' deleted`));
+    box(`Snippet '${selected}' deleted`, 'Delete Snippet', {
+        rounded: true,
+        width: 'auto',
+        contentAlign: 'center',
+        contentPadding: 4
+    });
 }
 //# sourceMappingURL=delete.component.js.map

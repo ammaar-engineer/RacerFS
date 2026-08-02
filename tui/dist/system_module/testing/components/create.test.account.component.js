@@ -1,5 +1,4 @@
-import { text } from '@clack/prompts';
-import chalk from 'chalk';
+import { box, text } from '@clack/prompts';
 import { testingService } from '../services/testing.service.js';
 /**
  * Create test account via backend API (development only)
@@ -19,7 +18,11 @@ export async function createTestAccountComponent() {
         return;
     const token = await testingService.createTestAccount(email);
     testingService.saveToken(token);
-    console.log(chalk.green('✓ Test account created and token saved'));
-    console.log(chalk.dim(`  Email: ${email}`));
+    box(`Email: ${email}`, "Test account", {
+        rounded: true,
+        width: 'auto',
+        contentAlign: 'center',
+        contentPadding: 4
+    });
 }
 //# sourceMappingURL=create.test.account.component.js.map

@@ -1,5 +1,4 @@
-import { text } from '@clack/prompts';
-import chalk from 'chalk';
+import { box, text } from '@clack/prompts';
 import { snippetService } from '../services/snippet.service.js';
 export async function createSnippetComponent() {
     const alias = await text({
@@ -31,6 +30,11 @@ export async function createSnippetComponent() {
     if (typeof description !== 'string')
         return;
     await snippetService.create(alias, command, description || undefined);
-    console.log(chalk.green(`✓ Snippet '${alias}' created`));
+    box(`Snippet '${alias}' created`, 'Snippet', {
+        rounded: true,
+        width: 'auto',
+        contentAlign: 'center',
+        contentPadding: 4
+    });
 }
 //# sourceMappingURL=create.component.js.map

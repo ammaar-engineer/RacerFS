@@ -1,4 +1,4 @@
-import { select } from '@clack/prompts';
+import { box, select } from '@clack/prompts';
 import chalk from 'chalk';
 import fs from 'node:fs';
 import axios from 'axios';
@@ -16,7 +16,12 @@ export async function uploadFileComponent() {
     // List file di CWD
     const localFiles = fileService.listLocalFiles();
     if (localFiles.length === 0) {
-        console.log(chalk.yellow('No files found in current directory'));
+        box('No files found in current directory', 'Upload', {
+            rounded: true,
+            width: 'auto',
+            contentAlign: 'center',
+            contentPadding: 4
+        });
         return;
     }
     // User pilih file dari list
@@ -47,12 +52,22 @@ export async function uploadFileComponent() {
     catch {
         // Upload gagal, confirm FAILED ke backend
         await fileService.confirmUpload(fileName, fileKey, fileSize, 'FAILED');
-        console.log(chalk.red('✗ Upload failed'));
+        box('Upload failed', 'Upload', {
+            rounded: true,
+            width: 'auto',
+            contentAlign: 'center',
+            contentPadding: 4
+        });
         return;
     }
     // Step 3: Confirm upload ke backend
     console.log(chalk.dim('→ Confirming upload...'));
     await fileService.confirmUpload(fileName, fileKey, fileSize, 'SUCCESS');
-    console.log(chalk.green(`✓ '${fileName}' uploaded successfully`));
+    box(`'${fileName}' uploaded successfully`, 'Upload', {
+        rounded: true,
+        width: 'auto',
+        contentAlign: 'center',
+        contentPadding: 4
+    });
 }
 //# sourceMappingURL=upload.component.js.map

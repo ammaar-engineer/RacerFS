@@ -1,4 +1,4 @@
-import chalk from 'chalk';
+import { box } from '@clack/prompts';
 import { fileService } from '../services/file.service.js';
 function formatBytes(bytes) {
     if (bytes === 0)
@@ -16,11 +16,16 @@ function progressBar(used, total, width = 30) {
 }
 export async function storageInfoComponent() {
     const info = await fileService.getStorageInfo();
-    console.log('');
-    console.log(chalk.bold('Storage Info'));
-    console.log(`  ${progressBar(info.used_storage, info.total_storage)}`);
-    console.log(`  Used      : ${chalk.yellow(formatBytes(info.used_storage))} / ${formatBytes(info.total_storage)}`);
-    console.log(`  Available : ${chalk.green(formatBytes(info.available_storage))}`);
-    console.log('');
+    const content = [
+        progressBar(info.used_storage, info.total_storage),
+        `Used      : ${formatBytes(info.used_storage)} / ${formatBytes(info.total_storage)}`,
+        `Available : ${formatBytes(info.available_storage)}`
+    ].join('\n');
+    box(content, 'Storage', {
+        rounded: true,
+        width: 'auto',
+        contentAlign: 'left',
+        contentPadding: 2
+    });
 }
 //# sourceMappingURL=storage.component.js.map

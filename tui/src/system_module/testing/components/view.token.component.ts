@@ -1,4 +1,4 @@
-import chalk from 'chalk'
+import { box } from '@clack/prompts'
 import { fsService } from '../../../system_services/fs.service.js'
 
 /**
@@ -8,10 +8,19 @@ export async function viewTokenComponent(): Promise<void> {
   const userData = fsService.readUserData()
 
   if (!userData) {
-    console.log(chalk.red('✗ No token found'))
+    box('No token found', 'Token', {
+      rounded: true,
+      width: 'auto',
+      contentAlign: 'center',
+      contentPadding: 4
+    })
     return
   }
 
-  console.log(chalk.blue('Saved Token:'))
-  console.log(userData.account_token)
+  box(userData.account_token, 'Saved Token', {
+    rounded: true,
+    width: 'auto',
+    contentAlign: 'left',
+    contentPadding: 2
+  })
 }

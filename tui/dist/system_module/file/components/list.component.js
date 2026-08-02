@@ -1,4 +1,4 @@
-import chalk from 'chalk';
+import { box } from '@clack/prompts';
 import { fileService } from '../services/file.service.js';
 function formatBytes(bytes) {
     if (bytes === 0)
@@ -11,15 +11,24 @@ function formatBytes(bytes) {
 export async function listFileComponent() {
     const files = await fileService.getList();
     if (files.length === 0) {
-        console.log(chalk.yellow('No files found'));
+        box('No files found', 'Files', {
+            rounded: true,
+            width: 'auto',
+            contentAlign: 'center',
+            contentPadding: 4
+        });
         return;
     }
-    console.log('');
-    files.forEach((f) => {
-        const visibility = f.is_public ? chalk.green('public ') : chalk.dim('private');
-        const size = chalk.dim(formatBytes(f.size).padStart(10));
-        console.log(`${visibility}  ${size}  ${chalk.white(f.name)}`);
+    const content = files.map((f) => {
+        const visibility = f.is_public ? 'public ' : 'private';
+        const size = formatBytes(f.size).padStart(10);
+        return `${visibility}  ${size}  ${f.name}`;
+    }).join('\n');
+    box(content, `Files (${files.length})`, {
+        rounded: true,
+        width: 'auto',
+        contentAlign: 'left',
+        contentPadding: 2
     });
-    console.log('');
 }
 //# sourceMappingURL=list.component.js.map

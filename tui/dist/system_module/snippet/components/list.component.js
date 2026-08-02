@@ -1,18 +1,28 @@
-import chalk from 'chalk';
+import { box } from '@clack/prompts';
 import { snippetService } from '../services/snippet.service.js';
 export async function listSnippetComponent() {
     const snippets = await snippetService.getList();
     if (snippets.length === 0) {
-        console.log(chalk.yellow('No snippets found'));
+        box('No snippets found', 'Snippets', {
+            rounded: true,
+            width: 'auto',
+            contentAlign: 'center',
+            contentPadding: 4
+        });
         return;
     }
-    console.log('');
-    snippets.forEach((s) => {
-        console.log(`${chalk.green(s.alias.padEnd(15))} ${chalk.white(s.command)}`);
+    const content = snippets.map((s) => {
+        const line = `${s.alias.padEnd(15)} ${s.command}`;
         if (s.description) {
-            console.log(`${' '.repeat(15)} ${chalk.dim(s.description)}`);
+            return `${line}\n${' '.repeat(15)} ${s.description}`;
         }
+        return line;
+    }).join('\n');
+    box(content, `Snippets (${snippets.length})`, {
+        rounded: true,
+        width: 'auto',
+        contentAlign: 'left',
+        contentPadding: 2
     });
-    console.log('');
 }
 //# sourceMappingURL=list.component.js.map

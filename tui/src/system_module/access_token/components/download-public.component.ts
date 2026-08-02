@@ -1,4 +1,4 @@
-import { select } from '@clack/prompts'
+import { box, select } from '@clack/prompts'
 import chalk from 'chalk'
 import { spawnSync } from 'node:child_process'
 import path from 'node:path'
@@ -11,7 +11,12 @@ export async function downloadPublicComponent(): Promise<void> {
   const accessTokens = userData?.access_tokens ?? []
 
   if (accessTokens.length === 0) {
-    console.log(chalk.yellow('No access tokens available. Create one first via "Manage Access Tokens".'))
+    box('No access tokens available. Create one first via "Manage Access Tokens".', 'Download Public', {
+      rounded: true,
+      width: 'auto',
+      contentAlign: 'center',
+      contentPadding: 4
+    })
     return
   }
 
@@ -31,7 +36,12 @@ export async function downloadPublicComponent(): Promise<void> {
   const files = await fileService.getPublicList(selectedToken)
 
   if (files.length === 0) {
-    console.log(chalk.yellow('No public files available from this token owner'))
+    box('No public files available from this token owner', 'Download Public', {
+      rounded: true,
+      width: 'auto',
+      contentAlign: 'center',
+      contentPadding: 4
+    })
     return
   }
 
@@ -41,7 +51,7 @@ export async function downloadPublicComponent(): Promise<void> {
     options: files.map((f) => ({
       value: f.name,
       label: f.name,
-      hint: `${(f.size / 1024).toFixed(2)} KB • ${f.type || 'unknown'}`
+      hint: `${(f.size / 1024).toFixed(2)} KB • ${f.file_type || 'unknown'}`
     }))
   })
   if (typeof selectedFile !== 'string') return
@@ -59,9 +69,19 @@ export async function downloadPublicComponent(): Promise<void> {
   })
 
   if (result.status !== 0) {
-    console.log(chalk.red('✗ Download failed'))
+    box('Download failed', 'Download Public', {
+      rounded: true,
+      width: 'auto',
+      contentAlign: 'center',
+      contentPadding: 4
+    })
     return
   }
 
-  console.log(chalk.green(`✓ File '${selectedFile}' downloaded to ${outputPath}`))
+  box(`File '${selectedFile}' downloaded to ${outputPath}`, 'Download Public', {
+    rounded: true,
+    width: 'auto',
+    contentAlign: 'center',
+    contentPadding: 4
+  })
 }

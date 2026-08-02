@@ -1,11 +1,15 @@
-import { select } from '@clack/prompts';
-import chalk from 'chalk';
+import { box, select } from '@clack/prompts';
 import { fileService } from '../services/file.service.js';
 export async function deleteFileComponent() {
     // Fetch-first
     const files = await fileService.getList();
     if (files.length === 0) {
-        console.log(chalk.yellow('No files to delete'));
+        box('No files to delete', 'Delete', {
+            rounded: true,
+            width: 'auto',
+            contentAlign: 'center',
+            contentPadding: 4
+        });
         return;
     }
     const selected = await select({
@@ -29,6 +33,11 @@ export async function deleteFileComponent() {
     if (confirm !== 'yes')
         return;
     await fileService.delete(selected);
-    console.log(chalk.green(`✓ File '${selected}' deleted`));
+    box(`File '${selected}' deleted`, 'Delete', {
+        rounded: true,
+        width: 'auto',
+        contentAlign: 'center',
+        contentPadding: 4
+    });
 }
 //# sourceMappingURL=delete.component.js.map

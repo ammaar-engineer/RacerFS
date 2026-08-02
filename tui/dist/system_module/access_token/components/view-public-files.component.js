@@ -1,4 +1,4 @@
-import { select } from '@clack/prompts';
+import { box, select } from '@clack/prompts';
 import chalk from 'chalk';
 import { fileService } from '../../file/services/file.service.js';
 import { fsService } from '../../../system_services/fs.service.js';
@@ -7,7 +7,12 @@ export async function viewPublicFilesComponent() {
     const userData = fsService.readUserData();
     const accessTokens = userData?.access_tokens ?? [];
     if (accessTokens.length === 0) {
-        console.log(chalk.yellow('No access tokens available. Create one first via "Manage Access Tokens".'));
+        box('No access tokens available. Create one first via "Manage Access Tokens".', 'Public Files', {
+            rounded: true,
+            width: 'auto',
+            contentAlign: 'center',
+            contentPadding: 4
+        });
         return;
     }
     // Select access token
@@ -25,17 +30,25 @@ export async function viewPublicFilesComponent() {
     console.log(chalk.dim('→ Fetching public files...'));
     const files = await fileService.getPublicList(selectedToken);
     if (files.length === 0) {
-        console.log(chalk.yellow('No public files available from this token owner'));
+        box('No public files available from this token owner', 'Public Files', {
+            rounded: true,
+            width: 'auto',
+            contentAlign: 'center',
+            contentPadding: 4
+        });
         return;
     }
     // Display file list
-    console.log(chalk.green(`\n✓ Found ${files.length} public file(s):\n`));
-    files.forEach((file) => {
+    const content = files.map((file) => {
         const sizeInKB = (file.size / 1024).toFixed(2);
         const uploadDate = new Date(file.uploaded_at).toLocaleDateString();
-        console.log(chalk.blue(`  • ${file.name}`));
-        console.log(chalk.dim(`    Size: ${sizeInKB} KB | Type: ${file.type} | Uploaded: ${uploadDate}`));
+        return `• ${file.name}\n  Size: ${sizeInKB} KB | Type: ${file.file_type} | Uploaded: ${uploadDate}`;
+    }).join('\n\n');
+    box(`${content}\n\nTip: Use "Download Public File" to download any of these files.`, `Public Files (${files.length})`, {
+        rounded: true,
+        width: 'auto',
+        contentAlign: 'left',
+        contentPadding: 2
     });
-    console.log(chalk.dim('\nTip: Use "Download Public File" to download any of these files.'));
 }
 //# sourceMappingURL=view-public-files.component.js.map
